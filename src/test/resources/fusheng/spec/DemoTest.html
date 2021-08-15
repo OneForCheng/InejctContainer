@@ -1,0 +1,33 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>伏生Spec</title>
+</head>
+<body>
+  <p>伏生测试Spec用例！</p>
+  <p>你知道伏生是谁吗？</p>
+  <div class="example">
+    <div>
+      <p>是一个历史名人的老师哦</p>
+      <p class="assertion" data-expect="equal" data-action="getName">司马迁</p>
+    </div>
+    <table class="row-function" data-action="split" data-params="fullName" data-return="splitRes">
+      <tr>
+        <th class="variable" data-name="fullName">Full Name</th>
+        <th class="assertion" data-expect="equal" data-actual="splitRes.firstName">First Name</th>
+        <th class="assertion" data-expect="equal" data-actual="splitRes.lastName">Last Name</th>
+      </tr>
+      <tr>
+        <td>John Smith</td>
+        <td>John</td>
+        <td>Smith</td>
+      </tr>
+      <tr>
+        <td>David Peterson</td>
+        <td>David</td>
+        <td>Peterson</td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>
