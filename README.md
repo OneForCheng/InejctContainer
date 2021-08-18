@@ -25,7 +25,7 @@ InjectContainer container = new InjectContainer();
 A a = (A)container.getInstance(A.class); // 可以正确获取 A 的实例
 ```
 
-首先，实例化一个 `InjectContainer` 对象 `container`，然后通过把对象 `A`  的类型传递给 `container` 的 `getInstance` 方法，就可以获得一个对象 `A` 的实例。
+首先，实例化一个 `InjectContainer` 对象 `container`，然后通过把对象 `A`  的类型传递给 `container` 的 `getInstance` 方法，就可以获得一个对象 `A` 的实例 `a`。
 
 <br />
 
