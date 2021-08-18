@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-	implementation files("$projectDir/runner.jar")
+	implementation files("$projectDir/lib/runner.jar")
 }
 
 test {
