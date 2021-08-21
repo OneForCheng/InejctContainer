@@ -132,23 +132,24 @@ Blue b = (Blue)container.getInstance(Blue.class); // Throw Exception: circular d
 
 <br />
 
-<p>最后，如果我们将 <code>@Inject</code> 注解不只用在对象的构造函数上，也用于字段上：</p>
-<pre><code class="language-java" lang="java">public class A {
+<div>
+  <p>最后，如果我们将 <code>@Inject</code> 注解不只用在对象的构造函数上，也尝试应用于字段或方法上：</p>
+  <pre><code class="language-java" lang="java">public class Fum {
   @Inject
-  public A(B b) {}
+  public Fum(Foo foo) {}
 
-  @Inject
-  public C c;
+  @Inject  // '@Inject' not applicable to field
+  public Qux qux;
+
+  @Inject  // '@Inject' not applicable to method
+  private void install(Foo foo)
 }
 
-public class B {}
-public class C {}
-
-InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // 可以正确获取 A 的实例
-expect(a.c).toBe(null); // 断言通过
+public class Foo {}
+public class Qux {}
 </code></pre>
-<p><code>container</code> 使用 <code>getInstance</code> 方法可以成功获取对象 <code>A</code> 的实例，但其字段 <code>c</code> 的值仍旧为 <code>null</code>。可以看出，<code>InjectContainer</code> 中的 <code>@Inject</code> 注解只对对象的构造函数有效，就算将 <code>@Inject</code> 注解声明与字段或其他地方，也不会自动的注入相应的依赖实例。</p>
+  <p>可以看到，编辑器或运行程序时将会提醒： <code>@Inject</code> 对于字段或方法不适用</p>
+</div>
 
 <br />
 
