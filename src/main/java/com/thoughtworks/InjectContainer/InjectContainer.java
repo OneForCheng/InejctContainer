@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 public class InjectContainer {
     private final Set<Class<?>> creatingClasses = Collections.synchronizedSet(new HashSet<>());
 
+    private final Map<Class<?>, Object> singletonClasses = Collections.synchronizedMap(new HashMap<>());
+
     public  <T> T  getInstance(Class<T> clazz) {
         List<Constructor<?>> injectableConstructors = getInjectableConstructors(clazz);
 
@@ -18,11 +20,22 @@ public class InjectContainer {
 
         Constructor<T> constructor = (Constructor<T>)injectableConstructors.get(0);
 
+        boolean isSingleton = clazz.isAnnotationPresent(Singleton.class);
+
+        if (isSingleton) {
+            Object singleton = singletonClasses.get(clazz);
+            if (singleton != null) return (T)singleton;
+        }
+
         creatingClasses.add(clazz);
 
         T target = createFromConstructor(constructor);
 
         creatingClasses.remove(clazz);
+
+        if (isSingleton) {
+            singletonClasses.put(clazz, target);
+        }
 
         return target;
     }

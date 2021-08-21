@@ -157,3 +157,39 @@ public class Qux {}
 ```
 
 可以看到，编辑器或运行程序时将会提醒： `@Inject` 对于字段或方法不适用
+
+<br />
+
+### 4. 使用 @Singleton 注解
+
+通过使用 `@Singleton` 注解标识对象，当对象作为依赖被注入时会是对象的同一个实例。
+
+<br />
+
+如下，对象 `Shme` 被  `@Singleton` 注解标识，并且在对象 `Jim` 中作为依赖被注入：
+
+```java
+public class Jim {
+  private Shme s1;
+  private Shme s2;
+  @Inject
+  public Jim(Shme s1, Shme s2) {
+    this.s1 = s1;
+    this.s2 = s2;
+  }
+  
+  public boolean isSame() {
+    return s1 == s2;
+  }
+}
+
+@Singleton
+public class Shme {}
+
+InjectContainer container = new InjectContainer();
+Jim jim = (Jim)container.getInstance(Jim.class); // 可以正确获取 Jim 的实例
+assertEquals(jim.isSame(), true) // 断言正确
+```
+
+当 `container` 使用 `getInstance` 方法成功获取对象 `Jim` 的实例时，会发现其依赖的对象 `Shme`  被  `@Singleton` 注解标识，因此在自动注入的时候会只会生成一个实例，即 `s1` 和 `s2` 是同一个实例，最终当调用实例 `jim` 的 `isSame` 方法，其返回结果是为 `true`。
+

@@ -4,6 +4,9 @@ import com.thoughtworks.InjectContainer.models.BaseTest;
 import com.thoughtworks.InjectContainer.enums.ExecuteStatus;
 import com.thoughtworks.fusheng.integration.junit5.FuShengTest;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 @FuShengTest
 public class InjectContainerTest extends BaseTest {
     private Object instance;
@@ -31,5 +34,10 @@ public class InjectContainerTest extends BaseTest {
 
     public String getExceptionMessage() {
         return exception != null ? exception.getMessage() : NULL;
+    }
+
+    public String invokeInstanceMethod(String methodName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = instance.getClass().getMethod(methodName);
+        return method.invoke(instance).toString();
     }
 }

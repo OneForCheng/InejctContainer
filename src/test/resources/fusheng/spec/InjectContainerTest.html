@@ -153,5 +153,36 @@ public class Qux {}
 
 <br />
 
+<h3 id='4-使用-singleton-注解'>4. 使用 @Singleton 注解</h3>
+<p>通过使用 <code>@Singleton</code> 注解标识对象，当对象作为依赖被注入时会是对象的同一个实例。</p>
+
+<br>
+
+<div class="example">
+  <p>如下，对象 <code>Shme</code> 被  <code>@Singleton</code> 注解标识，并且在对象 <code class="variable" data-name="className">Jim</code> 中作为依赖被注入：</p>
+  <pre><code class='language-java' lang='java'>public class Jim {
+  private Shme s1;
+  private Shme s2;
+  @Inject
+  public Jim(Shme s1, Shme s2) {
+    this.s1 = s1;
+    this.s2 = s2;
+  }
+
+  public boolean isSame() {
+    return s1 == s2;
+  }
+}
+
+@Singleton
+public class Shme {}
+
+InjectContainer container = new InjectContainer();
+Jim jim = (Jim)container.getInstance(Jim.class); // 可以正确获取 Jim 的实例
+assertEquals(jim.isSame(), true) // 断言正确
+</code></pre>
+  <p>当 <code>container</code> 使用 <code>getInstance</code> 方法<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">成功</span>获取对象 <code class="assertion" data-expect="equal" data-action="getInstanceClassName">Jim</code> 的实例时，会发现其依赖的对象 <code>Shme</code>  被  <code>@Singleton</code> 注解标识，因此在自动注入的时候会只会生成一个实例，即 <code>s1</code> 和 <code>s2</code> 是同一个实例，最终当调用实例 <code>jim</code> 的 <code class="variable" data-name="methodName">isSame</code> 方法，其返回结果是为 <code class="assertion" data-expect="equal" data-action="invokeInstanceMethod" data-params="methodName">true</code>。</p>
+</div>
+
 </body>
 </html>
