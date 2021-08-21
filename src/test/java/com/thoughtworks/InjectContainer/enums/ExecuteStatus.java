@@ -1,7 +1,7 @@
 package com.thoughtworks.InjectContainer.enums;
 
 public enum ExecuteStatus {
-    FAILED("失败"),
+    FAILURE("失败"),
     SUCCESS("成功");
 
     private String description;

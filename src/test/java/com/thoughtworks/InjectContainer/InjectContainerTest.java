@@ -14,13 +14,13 @@ public class InjectContainerTest extends BaseTest {
         try {
             instance = container.getInstance(clazz);
         } catch (Exception e) {
-            return ExecuteStatus.FAILED.getDescription();
+            return ExecuteStatus.FAILURE.getDescription();
         }
 
         return ExecuteStatus.SUCCESS.getDescription();
     }
 
     public String getInstanceClassName() {
-        return instance.getClass().getSimpleName();
+        return instance != null ? instance.getClass().getSimpleName() : null;
     }
 }
