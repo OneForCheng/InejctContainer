@@ -79,31 +79,35 @@ Fred fred = (Fred)container.getInstance(Fred.class); // 可以正确获取 Fred 
 
 <br />
 
-<p>不过，如果考虑对象 <code>A</code> 有多个共有的构造函数：</p>
-<pre><code class="language-java" lang="java">public class A {
-  public A() {}
+<div class="example">
+  <p>不过，如果考虑对象有多个共有的构造函数，如下对象 <code class="variable" data-name="className">Thud</code> ：</p>
+  <pre><code class="language-java" lang="java">public class Thud {
+  public Thud() {}
 
   @Inject
-  public A(B b) {}
+  public Thud(Qux qux) {}
 }
 
 // 或者
 
-public class A {
+public class Thud {
   @Inject
-  public A(int i) {}
+  public Thud(int i) {}
 
   @Inject
-  public A(B b) {}
+  public Thud(Qux Qux) {}
 }
 
-public class B {}
+public class Qux {}
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // Throw Exception: duplicated constructor for injection class A
+Thud thud = (Thud)container.getInstance(Thud.class); // Throw Exception: multiple injectable constructor for injection class Thud
 </code></pre>
-<p>当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code>A</code> 的实例时，由于扫描到对象 <code>A</code> 有多个可以自动注入的构造函数，不知道应该用哪一个构造函数来实例化对象 <code>A</code>，因此将会报错抛出一个异常。</p>
+  <p>当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code>Thud</code> 的实例时，由于扫描到对象 <code>Thud</code> 有多个可以自动注入的构造函数，不知道应该用哪一个构造函数来实例化对象 <code>Thud</code>，因此将会<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">multiple injectable constructor for injection class Thud</span> 。</p>
+</div>
+
 <br />
+
 <p>另外，如果依赖注入的对象存在循环依赖：</p>
 <pre><code class="language-java" lang="java">public class A {
   @Inject

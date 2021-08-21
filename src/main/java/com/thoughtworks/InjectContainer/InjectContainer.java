@@ -21,8 +21,12 @@ public class InjectContainer {
     public  <T> T  getInstance(Class<T> clazz) {
         List<Constructor<?>> injectableConstructors = getInjectableConstructors(clazz);
 
-        if (injectableConstructors.isEmpty()) {
+        int size = injectableConstructors.size();
+        if (size == 0) {
             throw new InjectException(String.format("no accessible constructor for injection class %s", clazz.getSimpleName()));
+        }
+        if (size > 1) {
+            throw new InjectException(String.format("multiple injectable constructor for injection class %s", clazz.getSimpleName()));
         }
 
         Constructor<T> constructor = (Constructor<T>)injectableConstructors.get(0);
@@ -35,7 +39,7 @@ public class InjectContainer {
         try {
             return constructor.newInstance(params);
         } catch (Exception e) {
-            throw  new InjectException("create instance from constructor error", e);
+            throw  new InjectException(String.format("create instance error from %s constructor", constructor.getName()), e);
         }
     }
 
