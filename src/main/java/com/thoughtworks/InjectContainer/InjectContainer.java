@@ -69,7 +69,11 @@ public class InjectContainer {
                 Class<?> clazz = registeredQualifiedClasses.iterator().next();
                 return getInstance(clazz);
             } else if (registeredQualifiedClasses.size() > 1) {
-                throw new InjectException(String.format("multiple injectable annotations for injection parameter %s", parameter.getName()));
+                throw new InjectException(String.format("multiple injectable class %s for injection parameter %s because of using multiple annotations %s",
+                        registeredQualifiedClasses.stream().map(Class::getSimpleName).collect(Collectors.joining(",")),
+                        parameter.getType().getSimpleName(),
+                        annotations.stream().map(annotation -> annotation.annotationType().getSimpleName()).collect(Collectors.joining(",")))
+                );
             }
         }
 
