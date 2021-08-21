@@ -192,3 +192,76 @@ assertEquals(jim.isSame(), true) // 断言正确
 ```
 
 当 `container` 使用 `getInstance` 方法成功获取对象 `Jim` 的实例时，会发现其依赖的对象 `Shme`  被  `@Singleton` 注解标识，因此在自动注入的时候会只会生成一个实例，即 `s1` 和 `s2` 是同一个实例，最终当调用实例 `jim` 的 `isSame` 方法，其返回结果是为 `true`。
+
+<br />
+
+### 5. 使用 @Named 注解
+
+通过使用 `@Named` 注解标识对象，然后在构造函数相应的参数中使用同名的注解标识参数，InjectContainer 在解析参数时会优先判断是否使用了别名注解，如果使用了则会优先去别名注解列表中查找相应对象，找到则将构造相应实例，如果没有找到，则继续使用原参数的类型构造相应实例。
+
+<br />
+
+如下，对象 `Bongo` 带有一个有参构造函数，并且其参数 `noot` 被 `@Named` 注解标识：
+
+```java
+public class Bongo {
+  @Inject
+  public Bongo(@Named("none") Noot noot) {}
+}
+
+@Named("noot")
+public class Noot {}
+
+InjectContainer container = new InjectContainer();
+cantainer.addClassQualifier(Noot.class);
+Bongo bongo = (Bongo)container.getInstance(Bongo.class); // 可以正确获取 Bongo 的实例
+```
+
+首先，创建了 `container` 实例之后，通过其 `addClassQualifier` 方法将被 `@Named` 标识的对象 `Noot`  添加到别名注解列表中。当 `container` 使用 `getInstance` 方法去获取对象 `Bongo` 的实例时，会发现对象 `Bongo` 的构造函数的 `noot` 参数是被 `@Named` 标识的，则会优先去别名注解列表中查找，会发现无法找到别名为 `none` 的注解，因此将会直接使用对象 `Noot` 去构造参数的实例，最终同样可以成功地获得对象 `Bongo` 的实例。
+
+<br />
+
+另外，我们继续来看一个能够找到别名注解的例子。如下，有一个对象 `Car`，在其构造函数中使用别名注解注入了两个具有相同父类的不同对象的实例：
+
+```java
+public class Car {
+    private Seat driverSeat;
+    private Seat passengerSeat;
+
+    @Inject
+    public Car(@Named("driver") Seat driverSeat, @Named("passenger") Seat passengerSeat) {
+        this.driverSeat = driverSeat;
+        this.passengerSeat = passengerSeat;
+    }
+    
+    public String getDriverSeatType() { return driverSeat.getType(); }
+
+    public String getPassengerSeatType() { return passengerSeat.getType(); }
+}
+
+public class Seat {
+    public String getType() { return "seat"; }
+}
+
+@Named("driver")
+public class DriverSeat extends Seat {
+    @Override
+    public String getType() { return "driverSeat"; }
+}
+
+@Named("passenger")
+public class PassengerSeat extends Seat {
+    @Override
+    public String getType() { return "passengerSeat"; }
+}
+
+InjectContainer container = new InjectContainer();
+cantainer.addClassQualifier(DriverSeat.class);
+cantainer.addClassQualifier(PassengerSeat.class);
+Car car = (Car)container.getInstance(Car.class); // 可以正确获取 Car 的实例
+assertEquals(car.getDriverSeatType(), "driverSeat") // 断言正确
+assertEquals(car.getPassengerSeatType(), "passengerSeat") // 断言正确
+```
+
+可以看到，创建了 `container` 实例之后，同样通过其 `addClassQualifier` 方法将被 `@Named` 标识的 `DriverSeat`  对象和 `PassengerSeat` 对象都添加到别名注解列表中。当 `container` 使用 `getInstance` 方法去获取对象 `Car` 的实例时，会发现对象 `Car` 的构造函数的 `driverSeat` 参数和 `passengerSeat` 参数都被 `@Named` 标识，会优先去别名注解列表中查找，会发现都可以找到相应的别名注解记录的对象，因此将会使用别名注解对应的 `DriverSeat` 对象和 `PassengerSeat` 对象去构造参数的实例，最终可以成功地获得对象 `Car` 的实例。也因此当调用实例 `car` 的 `getDriverSeatType` 方法时会返回 `driverSeat` ，而调用 `getPassengerSeatType` 方法会返回 `passengerSeat`。
+

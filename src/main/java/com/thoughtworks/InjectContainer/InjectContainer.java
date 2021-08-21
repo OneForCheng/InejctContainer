@@ -82,4 +82,8 @@ public class InjectContainer {
             throw new InjectException(String.format("circular dependency on constructor, the class is %s", constructor.getDeclaringClass().getSimpleName()));
         }
     }
+
+    public void addClassQualifier(Class<?> clazz) {
+
+    }
 }

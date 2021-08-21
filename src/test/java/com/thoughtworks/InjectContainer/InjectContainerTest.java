@@ -28,6 +28,11 @@ public class InjectContainerTest extends BaseTest {
         return ExecuteStatus.SUCCESS.getDescription();
     }
 
+    public void addClassQualifier(String className) throws ClassNotFoundException {
+        Class<?> clazz = getClassByName(className);
+        container.addClassQualifier(clazz);
+    }
+
     public String getInstanceClassName() {
         return instance != null ? instance.getClass().getSimpleName() : NULL;
     }
