@@ -41,18 +41,22 @@ Bar bar = (Bar)container.getInstance(Bar.class); // Throw Exception: no accessib
 
 <br />
 
-<p>另外，如果对象 A 带有一个有参构造函数：</p>
-<pre><code class="language-java" lang="java">public class A {
-  public A(B b) {}
+<div class="example">
+  <p>另外，如果对象带有一个有参构造函数，如下对象 <code class="variable" data-name="className">Baz</code> ：</p>
+  <pre><code class="language-java" lang="java">public class Baz {
+  public Baz(Qux qux) {}
 }
 
-public class B {}
+public class Qux {}
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // Throw Exception: no accessible constructor for injection class A
+Baz baz = (Baz)container.getInstance(Baz.class); // Throw Exception: no accessible constructor for injection class Baz
 </code></pre>
-<p>同样用 <code>container</code> 的 <code>getInstance</code> 方法去获取对象 <code>A</code> 的实例时，也会抛出一个异常。因为对象 A 的构造函数并没有用 <code>@Inject</code> 注解来声明，那么 <code>container</code> 就不会将构造函数 <code>A</code> 中的参数 <code>b</code> 识别为需要自动注入的对象，所以无法创建对象 <code>A</code> 的实例。</p>
+  <p>同样用 <code>container</code> 的 <code>getInstance</code> 方法去获取对象 <code>Baz</code> 的实例时，将会<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常：<span class="assertion" data-expect="equal" data-action="getExceptionMessage">no accessible constructor for injection class Baz</span>。因为对象 Baz 的构造函数并没有用 <code>@Inject</code> 注解来声明，那么 <code>container</code> 就不会将构造函数 <code>Baz</code> 中的参数 <code>qux</code> 识别为需要自动注入的对象，所以无法创建对象 <code>Baz</code> 的实例。</p>
+</div>
+
 <br />
+
 <h3 id="3-使用-inject-注解">3. 使用 @Inject 注解</h3>
 <p>通过使用 <code>@Inject</code> 注解来声明对象的构造函数，使其参数可以自动注入。</p>
 <br />
