@@ -156,7 +156,7 @@ public class Foo {}
 public class Qux {}
 ```
 
-可以看到，编辑器或运行程序时将会提醒： `@Inject` 对于字段或方法不适用
+可以看到，编辑器或运行程序时将会提醒： `@Inject` 对于字段或方法不适用。也就是 InjectContainer 中 的  `@Inject` 注解只能用于构造函数之上。
 
 <br />
 
@@ -192,4 +192,3 @@ assertEquals(jim.isSame(), true) // 断言正确
 ```
 
 当 `container` 使用 `getInstance` 方法成功获取对象 `Jim` 的实例时，会发现其依赖的对象 `Shme`  被  `@Singleton` 注解标识，因此在自动注入的时候会只会生成一个实例，即 `s1` 和 `s2` 是同一个实例，最终当调用实例 `jim` 的 `isSame` 方法，其返回结果是为 `true`。
-

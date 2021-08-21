@@ -36,7 +36,7 @@ public class InjectContainerTest extends BaseTest {
         return exception != null ? exception.getMessage() : NULL;
     }
 
-    public String invokeInstanceMethod(String methodName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public String invokeInstanceMethodWithReturnValue(String methodName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Method method = instance.getClass().getMethod(methodName);
         return method.invoke(instance).toString();
     }
