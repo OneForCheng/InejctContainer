@@ -10,6 +10,7 @@
 <br />
 <h3 id="2-一个简单样例">2. 一个简单样例</h3>
 <p>通过一个简单的样例来了解一下如何使用 <code>InjectContainer</code>。</p>
+
 <br />
 
 <div class="example">
@@ -25,16 +26,21 @@ Foo foo = (Foo)container.getInstance(Foo.class); // 可以正确获取 Foo 的�
 </div>
 
 <br />
-<p>但如果对象 <code>A</code> 没有一个共有的构造函数：</p>
-<pre><code class="language-java" lang="java">public class A {
-  private A() {}
+
+<div class="example">
+  <p>但如果对象没有一个共有的构造函数，如下对象 <code class="variable" data-name="className">Bar</code> ：</p>
+  <pre><code class="language-java" lang="java">public class Bar {
+  private Bar() {}
 }
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // Throw Exception: no accessible constructor for injection class A
+Bar bar = (Bar)container.getInstance(Bar.class); // Throw Exception: no accessible constructor for injection class Bar
 </code></pre>
-<p>那么当用 <code>container</code> 的 <code>getInstance</code> 方法去获取对象 A 的实例时，将会报错抛出一个异常。</p>
+  <p>那么当用 <code>container</code> 的 <code>getInstance</code> 方法去获取对象 <code>Bar</code> 的实例时，将会<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">no accessible constructor for injection class Bar</span> 。</p>
+</div>
+
 <br />
+
 <p>另外，如果对象 A 带有一个有参构造函数：</p>
 <pre><code class="language-java" lang="java">public class A {
   public A(B b) {}

@@ -6,7 +6,9 @@ import com.thoughtworks.fusheng.integration.junit5.FuShengTest;
 
 @FuShengTest
 public class InjectContainerTest extends BaseTest {
-    Object instance;
+    private Object instance;
+    private Exception exception;
+    private final String NULL = "null";
 
     public  String getInstance(String className) throws ClassNotFoundException {
         Class<?> clazz = getClassByName(className);
@@ -14,6 +16,7 @@ public class InjectContainerTest extends BaseTest {
         try {
             instance = container.getInstance(clazz);
         } catch (Exception e) {
+            exception = e;
             return ExecuteStatus.FAILURE.getDescription();
         }
 
@@ -21,6 +24,10 @@ public class InjectContainerTest extends BaseTest {
     }
 
     public String getInstanceClassName() {
-        return instance != null ? instance.getClass().getSimpleName() : null;
+        return instance != null ? instance.getClass().getSimpleName() : NULL;
+    }
+
+    public String getExceptionMessage() {
+        return exception != null ? exception.getMessage() : NULL;
     }
 }
