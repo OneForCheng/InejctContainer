@@ -1,4 +1,4 @@
-package com.thoughtworks.InjectContainer.exceptions;
+package com.thoughtworks.InjectContainer.exception;
 
 public class InjectException extends RunnerBaseException {
     public InjectException(String message, Throwable e) {

@@ -1,6 +1,8 @@
 package com.thoughtworks.InjectContainer;
 
-import com.thoughtworks.InjectContainer.exceptions.InjectException;
+import com.thoughtworks.InjectContainer.annotation.Inject;
+import com.thoughtworks.InjectContainer.annotation.Singleton;
+import com.thoughtworks.InjectContainer.exception.InjectException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;

@@ -1,4 +1,4 @@
-package com.thoughtworks.InjectContainer;
+package com.thoughtworks.InjectContainer.annotation;
 
 import java.lang.annotation.*;
 

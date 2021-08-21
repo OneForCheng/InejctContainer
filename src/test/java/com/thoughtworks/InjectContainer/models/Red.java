@@ -1,6 +1,6 @@
 package com.thoughtworks.InjectContainer.models;
 
-import com.thoughtworks.InjectContainer.Inject;
+import com.thoughtworks.InjectContainer.annotation.Inject;
 
 public class Red {
     @Inject

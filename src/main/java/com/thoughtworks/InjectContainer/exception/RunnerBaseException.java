@@ -1,4 +1,4 @@
-package com.thoughtworks.InjectContainer.exceptions;
+package com.thoughtworks.InjectContainer.exception;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
