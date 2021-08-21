@@ -59,20 +59,26 @@ Baz baz = (Baz)container.getInstance(Baz.class); // Throw Exception: no accessib
 
 <h3 id="3-使用-inject-注解">3. 使用 @Inject 注解</h3>
 <p>通过使用 <code>@Inject</code> 注解来声明对象的构造函数，使其参数可以自动注入。</p>
+
 <br />
-<p>如下，对象 A 带有一个有参构造函数，并且其用 <code>@Inject</code> 注解标识：</p>
-<pre><code class="language-java" lang="java">public class A {
+
+<div class="example">
+  <p>如下，对象 <code class="variable" data-name="className">Fred</code> 带有一个有参构造函数，并且其用 <code>@Inject</code> 注解标识：</p>
+  <pre><code class="language-java" lang="java">public class Fred {
   @Inject
-  public A(B b) {}
+  public Fred(Qux qux) {}
 }
 
-public class B {}
+public class Qux {}
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // 可以正确获取 A 的实例
+Fred fred = (Fred)container.getInstance(Fred.class); // 可以正确获取 Fred 的实例
 </code></pre>
-<p>当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code>A</code> 的实例时，通过扫描对象 <code>A</code> 的构造函数，可以成功地获取到带有 <code>@Inject</code> 注解的带参构造函数 <code>A</code>，进而能够进一步自动构建对象 <code>B</code> 的实例作为构造函数 <code>A</code> 的参数，最终将对象 <code>A</code> 的实例创建成功。</p>
+  <p>当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code>Fred</code> 的实例时，通过扫描对象 <code>Fred</code> 的构造函数，可以成功地获取到带有 <code>@Inject</code> 注解的带参构造函数 <code>Fred</code>，进而能够进一步自动构建对象 <code>Qux</code> 的实例作为构造函数 <code>Fred</code> 的参数，最终<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">成功</span>创建对象 <code class="assertion" data-expect="equal" data-action="getInstanceClassName">Fred</code> 的实例。</p>
+</div>
+
 <br />
+
 <p>不过，如果考虑对象 <code>A</code> 有多个共有的构造函数：</p>
 <pre><code class="language-java" lang="java">public class A {
   public A() {}

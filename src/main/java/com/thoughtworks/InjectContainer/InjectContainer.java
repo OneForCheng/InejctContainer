@@ -4,6 +4,7 @@ import com.thoughtworks.InjectContainer.exceptions.InjectException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,13 +18,29 @@ public class InjectContainer {
                 .collect(Collectors.toList());
     }
 
-    public  <T> T  getInstance(Class<T> clazz) throws InstantiationException, IllegalAccessException {
+    public  <T> T  getInstance(Class<T> clazz) {
         List<Constructor<?>> injectableConstructors = getInjectableConstructors(clazz);
 
         if (injectableConstructors.isEmpty()) {
             throw new InjectException(String.format("no accessible constructor for injection class %s", clazz.getSimpleName()));
         }
 
-        return clazz.newInstance();
+        Constructor<T> constructor = (Constructor<T>)injectableConstructors.get(0);
+
+        return createFromConstructor(constructor);
+    }
+
+    private <T> T createFromConstructor(Constructor<T> constructor) {
+        Object[] params = Arrays.stream(constructor.getParameters()).map(this::createFromParameter).toArray();
+        try {
+            return constructor.newInstance(params);
+        } catch (Exception e) {
+            throw  new InjectException("create instance from constructor error", e);
+        }
+    }
+
+    private Object createFromParameter(Parameter parameter) {
+        Class<?> clazz = parameter.getType();
+        return getInstance(clazz);
     }
 }

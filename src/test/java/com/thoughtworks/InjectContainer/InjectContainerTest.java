@@ -10,10 +10,12 @@ public class InjectContainerTest extends BaseTest {
     private Exception exception;
     private final String NULL = "null";
 
-    public  String getInstance(String className) throws ClassNotFoundException {
-        Class<?> clazz = getClassByName(className);
+    public  String getInstance(String className) {
+        instance = null;
+        exception = null;
 
         try {
+            Class<?> clazz = getClassByName(className);
             instance = container.getInstance(clazz);
         } catch (Exception e) {
             exception = e;
