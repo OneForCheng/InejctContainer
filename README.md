@@ -14,50 +14,51 @@ InjectContainer 是一个轻量级（简单实现）的依赖注入框架。简�
 
 <br />
 
-如下，`A` 是一个具有默认构造函数（无参构造函数）的对象：
+如下，`Foo` 是一个具有默认构造函数（无参构造函数）的对象：
 
 ```java
-public class A {
-  public A() {}
+public class Foo {
+  public Foo() {}
 }
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // 可以正确获取 A 的实例
+Foo foo = (Foo)container.getInstance(Foo.class); // 可以正确获取 Foo 的实例
 ```
 
-首先，实例化一个 `InjectContainer` 对象 `container`，然后通过把对象 `A`  的类型传递给 `container` 的 `getInstance` 方法，就可以获得一个对象 `A` 的实例 `a`。
+首先，实例化一个 `InjectContainer` 对象 `container`，然后通过把对象 `Foo` 的类型传递给 `container` 的 `getInstance` 方法，就可以成功获得一个对象 `Foo` 的实例 `foo`。
 
 <br />
 
-但如果对象 `A` 没有一个共有的构造函数：
 
-```Java
-public class A {
-  private A() {}
+但如果对象没有一个共有的构造函数，如下对象 `Bar` ：
+
+```java
+public class Bar {
+  private Bar() {}
 }
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // Throw Exception: no accessible constructor for injection class A
+Bar bar = (Bar)container.getInstance(Bar.class); // Throw Exception: no accessible constructor for injection class Bar
 ```
 
-那么当用 `container` 的 `getInstance` 方法去获取对象 A 的实例时，将会报错抛出一个异常。
+那么当用 `container` 的 `getInstance` 方法去获取对象 `Bar` 的实例时，将会失败并抛出异常： no accessible constructor for injection class Bar 。
 
 <br />
 
-另外，如果对象 A 带有一个有参构造函数：
+另外，如果对象带有一个有参构造函数，如下对象 `Baz` ：
 
 ```java
-public class A {
-  public A(B b) {}
+public class Baz {
+  public Baz(Qux qux) {}
 }
 
-public class B {}
+public class Qux {}
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // Throw Exception: no accessible constructor for injection class A
+Baz baz = (Baz)container.getInstance(Baz.class); // Throw Exception: no accessible constructor for injection class Baz
 ```
 
-同样用  `container` 的 `getInstance` 方法去获取对象 `A` 的实例时，也会抛出一个异常。因为对象 A 的构造函数并没有用 `@Inject` 注解来声明，那么 `container` 就不会将构造函数 `A` 中的参数 `b` 识别为需要自动注入的对象，所以无法创建对象 `A` 的实例。
+同样用 `container` 的 `getInstance` 方法去获取对象 `Baz` 的实例时，将会失败并抛出异常：no accessible constructor for injection class Baz。因为对象 Baz 的构造函数并没有用 `@Inject` 注解来声明，那么 `container` 就不会将构造函数 `Baz` 中的参数 `qux` 识别为需要自动注入的对象，所以无法创建对象 `Baz` 的实例。
 
 <br />
 
@@ -67,95 +68,92 @@ A a = (A)container.getInstance(A.class); // Throw Exception: no accessible const
 
 <br />
 
-如下，对象 A 带有一个有参构造函数，并且其用 `@Inject` 注解标识：
+如下，对象 `Fred` 带有一个有参构造函数，并且其用 `@Inject` 注解标识：
 
 ```java
-public class A {
+public class Fred {
   @Inject
-  public A(B b) {}
+  public Fred(Qux qux) {}
 }
 
-public class B {}
+public class Qux {}
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // 可以正确获取 A 的实例
+Fred fred = (Fred)container.getInstance(Fred.class); // 可以正确获取 Fred 的实例
 ```
 
-当 `container` 使用 `getInstance` 方法去获取对象 `A` 的实例时，通过扫描对象 `A` 的构造函数，可以成功地获取到带有 `@Inject` 注解的带参构造函数 `A`，进而能够进一步自动构建对象 `B` 的实例作为构造函数 `A` 的参数，最终将对象 `A` 的实例创建成功。
+当 `container` 使用 `getInstance` 方法去获取对象 `Fred` 的实例时，通过扫描对象 `Fred` 的构造函数，可以成功地获取到带有 `@Inject` 注解的带参构造函数 `Fred`，进而能够进一步自动构建对象 `Qux` 的实例作为构造函数 `Fred` 的参数，最终成功创建对象 `Fred` 的实例。
 
 <br />
 
-不过，如果考虑对象 `A` 有多个共有的构造函数：
+不过，如果考虑对象有多个共有的构造函数，如下对象 `Thud` ：
 
 ```java
-public class A {
-  public A() {}
+public class Thud {
+  public Thud() {}
 
   @Inject
-  public A(B b) {}
+  public Thud(Qux qux) {}
 }
 
 // 或者
 
-public class A {
+public class Thud {
   @Inject
-  public A(int i) {}
+  public Thud(int i) {}
 
   @Inject
-  public A(B b) {}
+  public Thud(Qux qux) {}
 }
 
-public class B {}
+public class Qux {}
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // Throw Exception: duplicated constructor for injection class A
+Thud thud = (Thud)container.getInstance(Thud.class); // Throw Exception: multiple injectable constructor for injection class Thud
 ```
 
-当 `container` 使用 `getInstance` 方法去获取对象 `A` 的实例时，由于扫描到对象 `A` 有多个可以自动注入的构造函数，不知道应该用哪一个构造函数来实例化对象 `A`，因此将会报错抛出一个异常。
+当 `container` 使用 `getInstance` 方法去获取对象 `Thud` 的实例时，由于扫描到对象 `Thud` 有多个可以自动注入的构造函数，不知道应该用哪一个构造函数来实例化对象 `Thud`，因此将会失败并抛出异常： multiple injectable constructor for injection class Thud 。
 
 <br />
 
 另外，如果依赖注入的对象存在循环依赖：
 
 ```java
-public class A {
+public class Red {
   @Inject
-  public A(B b) {}
+  public Red(Blue blue) {}
 }
 
-public class B {
+public class Blue {
   @Inject
-  public B(A a) {}
+  public Blue(Red Red) {}
 }
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // Throw Exception: circular dependency on constructor , the root class is A
-B b = (B)container.getInstance(B.class); // Throw Exception: circular dependency on constructor , the root class is B
+Red red = (Red)container.getInstance(Red.class); // Throw Exception: circular dependency on constructor, the class is Blue
+Blue b = (Blue)container.getInstance(Blue.class); // Throw Exception: circular dependency on constructor, the class is Red
 ```
 
-当 `container` 使用 `getInstance` 方法去获取对象 `A` 的实例时，通过扫描对象 `A` 的构造函数，可以成功地获取到带有 `@Inject` 注解的带参构造函数 `A`，进而尝试自动创建其依赖的参数 `b`，但创建对象 `B` 的实例的时候会发现其依赖对象 A 的实例，因而形成了一个循环的依赖，导致无法自动的创建相应的依赖，最报错抛出相应的异常。
+当 `container` 使用 `getInstance` 方法去获取对象 `Red` 的实例时，通过扫描对象 `Red` 的构造函数，可以成功地获取到带有 `@Inject` 注解的带参构造函数 `Red`，进而尝试自动创建其依赖的参数 `blue`，但创建对象 `Blue` 的实例的时候会发现其依赖对象 Red 的实例，因而形成了一个循环的依赖，导致无法自动的创建相应的依赖，最终将会执行失败并抛出异常： circular dependency on constructor, the class is Blue 。 获取 `Blue` 的实例同理。
 
 <br />
 
-最后，如果我们将  `@Inject` 注解不只用在对象的构造函数上，也用于字段上：
+最后，如果我们将 `@Inject` 注解不只用在对象的构造函数上，也尝试应用于字段或方法上：
 
 ```java
-public class A {
-    @Inject
-    public A(B b) {}
+public class Fum {
+  @Inject
+  public Fum(Foo foo) {}
 
-    @Inject
-    public C c;
+  @Inject  // '@Inject' not applicable to field
+  public Qux qux;
+
+  @Inject  // '@Inject' not applicable to method
+  private void install(Foo foo)
 }
 
-public class B {}
-public class C {}
-
-    InjectContainer container = new InjectContainer();
-    A a = (A)container.getInstance(A.class); // 可以正确获取 A 的实例
-    expect(a.c).toBe(null); // 断言通过
+public class Foo {}
+public class Qux {}
 ```
 
-`container` 使用 `getInstance` 方法可以成功获取对象 `A` 的实例，但其字段 `c` 的值仍旧为 `null`。可以看出，`InjectContainer` 中的 `@Inject` 注解只对对象的构造函数有效，就算将  `@Inject` 注解声明与字段或其他地方，也不会自动的注入相应的依赖实例。
-
-
+可以看到，编辑器或运行程序时将会提醒： `@Inject` 对于字段或方法不适用
