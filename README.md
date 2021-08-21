@@ -213,11 +213,11 @@ public class Bongo {
 public class Noot {}
 
 InjectContainer container = new InjectContainer();
-cantainer.addClassQualifier(Noot.class);
+cantainer.registerQualifiedClass(Noot.class);
 Bongo bongo = (Bongo)container.getInstance(Bongo.class); // 可以正确获取 Bongo 的实例
 ```
 
-首先，创建了 `container` 实例之后，通过其 `addClassQualifier` 方法将被 `@Named` 标识的对象 `Noot`  添加到别名注解列表中。当 `container` 使用 `getInstance` 方法去获取对象 `Bongo` 的实例时，会发现对象 `Bongo` 的构造函数的 `noot` 参数是被 `@Named` 标识的，则会优先去别名注解列表中查找，会发现无法找到别名为 `none` 的注解，因此将会直接使用对象 `Noot` 去构造参数的实例，最终同样可以成功地获得对象 `Bongo` 的实例。
+首先，创建了 `container` 实例之后，通过其 `registerQualifiedClass` 方法将被 `@Named` 标识的对象 `Noot`  添加到别名注解列表中。当 `container` 使用 `getInstance` 方法去获取对象 `Bongo` 的实例时，会发现对象 `Bongo` 的构造函数的 `noot` 参数是被 `@Named` 标识的，则会优先去别名注解列表中查找，会发现无法找到别名为 `none` 的注解，因此将会直接使用对象 `Noot` 去构造参数的实例，最终同样可以成功地获得对象 `Bongo` 的实例。
 
 <br />
 
@@ -256,12 +256,12 @@ public class PassengerSeat extends Seat {
 }
 
 InjectContainer container = new InjectContainer();
-cantainer.addClassQualifier(DriverSeat.class);
-cantainer.addClassQualifier(PassengerSeat.class);
+cantainer.registerQualifiedClass(DriverSeat.class);
+cantainer.registerQualifiedClass(PassengerSeat.class);
 Car car = (Car)container.getInstance(Car.class); // 可以正确获取 Car 的实例
 assertEquals(car.getDriverSeatType(), "driverSeat") // 断言正确
 assertEquals(car.getPassengerSeatType(), "passengerSeat") // 断言正确
 ```
 
-可以看到，创建了 `container` 实例之后，同样通过其 `addClassQualifier` 方法将被 `@Named` 标识的 `DriverSeat`  对象和 `PassengerSeat` 对象都添加到别名注解列表中。当 `container` 使用 `getInstance` 方法去获取对象 `Car` 的实例时，会发现对象 `Car` 的构造函数的 `driverSeat` 参数和 `passengerSeat` 参数都被 `@Named` 标识，会优先去别名注解列表中查找，会发现都可以找到相应的别名注解记录的对象，因此将会使用别名注解对应的 `DriverSeat` 对象和 `PassengerSeat` 对象去构造参数的实例，最终可以成功地获得对象 `Car` 的实例。也因此当调用实例 `car` 的 `getDriverSeatType` 方法时会返回 `driverSeat` ，而调用 `getPassengerSeatType` 方法会返回 `passengerSeat`。
+可以看到，创建了 `container` 实例之后，同样通过其 `registerQualifiedClass` 方法将被 `@Named` 标识的 `DriverSeat`  对象和 `PassengerSeat` 对象都添加到别名注解列表中。当 `container` 使用 `getInstance` 方法去获取对象 `Car` 的实例时，会发现对象 `Car` 的构造函数的 `driverSeat` 参数和 `passengerSeat` 参数都被 `@Named` 标识，会优先去别名注解列表中查找，会发现都可以找到相应的别名注解记录的对象，因此将会使用别名注解对应的 `DriverSeat` 对象和 `PassengerSeat` 对象去构造参数的实例，最终可以成功地获得对象 `Car` 的实例。也因此当调用实例 `car` 的 `getDriverSeatType` 方法时会返回 `driverSeat` ，而调用 `getPassengerSeatType` 方法会返回 `passengerSeat`。
 

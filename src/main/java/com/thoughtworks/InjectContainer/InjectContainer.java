@@ -1,9 +1,11 @@
 package com.thoughtworks.InjectContainer;
 
 import com.thoughtworks.InjectContainer.annotation.Inject;
+import com.thoughtworks.InjectContainer.annotation.Qualifier;
 import com.thoughtworks.InjectContainer.annotation.Singleton;
 import com.thoughtworks.InjectContainer.exception.InjectException;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -14,6 +16,8 @@ public class InjectContainer {
     private final Set<Class<?>> creatingClasses = Collections.synchronizedSet(new HashSet<>());
 
     private final Map<Class<?>, Object> singletonClasses = Collections.synchronizedMap(new HashMap<>());
+
+    private final Map<Annotation, Class<?>> qualifiedClasses = Collections.synchronizedMap(new HashMap<>());
 
     public  <T> T  getInstance(Class<T> clazz) {
         List<Constructor<?>> injectableConstructors = getInjectableConstructors(clazz);
@@ -55,6 +59,20 @@ public class InjectContainer {
     }
 
     private Object createFromParameter(Parameter parameter) {
+        List<Annotation> annotations = getQualifierAnnotations(parameter.getAnnotations());
+        if (!annotations.isEmpty()) {
+            Set<? extends Class<?>> registeredQualifiedClasses = annotations.stream()
+                    .filter(qualifiedClasses::containsKey)
+                    .map(qualifiedClasses::get)
+                    .collect(Collectors.toSet());
+            if (registeredQualifiedClasses.size() == 1) {
+                Class<?> clazz = registeredQualifiedClasses.iterator().next();
+                return getInstance(clazz);
+            } else if (registeredQualifiedClasses.size() > 1) {
+                throw new InjectException(String.format("multiple injectable annotations for injection parameter %s", parameter.getName()));
+            }
+        }
+
         Class<?> clazz = parameter.getType();
         return getInstance(clazz);
     }
@@ -83,7 +101,14 @@ public class InjectContainer {
         }
     }
 
-    public void addClassQualifier(Class<?> clazz) {
+    public void registerQualifiedClass(Class<?> clazz) {
+        List<Annotation> annotations = getQualifierAnnotations(clazz.getAnnotations());
+        annotations.forEach(annotation -> qualifiedClasses.put(annotation, clazz));
+    }
 
+    private List<Annotation> getQualifierAnnotations(Annotation[] annotations) {
+        return Arrays.stream(annotations)
+                .filter(annotation -> annotation.annotationType().isAnnotationPresent(Qualifier.class))
+                .collect(Collectors.toList());
     }
 }
