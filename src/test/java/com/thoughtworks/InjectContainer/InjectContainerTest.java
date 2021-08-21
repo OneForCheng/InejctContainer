@@ -1,21 +1,26 @@
 package com.thoughtworks.InjectContainer;
 
+import com.thoughtworks.InjectContainer.models.BaseTest;
+import com.thoughtworks.InjectContainer.enums.ExecuteStatus;
 import com.thoughtworks.fusheng.integration.junit5.FuShengTest;
 
-class A {
-    public A() {}
-}
-
 @FuShengTest
-public class InjectContainerTest {
+public class InjectContainerTest extends BaseTest {
+    Object instance;
 
-    public InjectContainer container = new InjectContainer();
+    public  String getInstance(String className) throws ClassNotFoundException {
+        Class<?> clazz = getClassByName(className);
 
-    public  String getInstance(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        Class<?> clazz = Class.forName(InjectContainerTest.class.getPackageName() + "." + className);
+        try {
+            instance = container.getInstance(clazz);
+        } catch (Exception e) {
+            return ExecuteStatus.FAILED.getDescription();
+        }
 
-        var instance = container.getInstance(clazz);
+        return ExecuteStatus.SUCCESS.getDescription();
+    }
 
-        return "成功";
+    public String getInstanceClassName() {
+        return instance.getClass().getSimpleName();
     }
 }

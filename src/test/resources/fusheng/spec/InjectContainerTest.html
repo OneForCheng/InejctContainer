@@ -13,15 +13,15 @@
 <br />
 
 <div class="example">
-  <p>如下，<code class="variable" data-name="className">A</code> 是一个具有默认构造函数（无参构造函数）的对象：</p>
-  <pre><code class="language-java" lang="java">public class A {
-  public A() {}
+  <p>如下，<code class="variable" data-name="className">Foo</code> 是一个具有默认构造函数（无参构造函数）的对象：</p>
+  <pre><code class="language-java" lang="java">public class Foo {
+  public Foo() {}
 }
 
 InjectContainer container = new InjectContainer();
-A a = (A)container.getInstance(A.class); // 可以正确获取 A 的实例
+Foo foo = (Foo)container.getInstance(Foo.class); // 可以正确获取 Foo 的实例
 </code></pre>
-  <p>首先，实例化一个 <code>InjectContainer</code> 对象 <code>container</code>，然后通过把对象 <code>A</code> 的类型传递给 <code>container</code> 的 <code>getInstance</code> 方法，就可以<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">成功</span>获得一个对象 <code>A</code> 的实例 <code>a</code>。</p>
+  <p>首先，实例化一个 <code>InjectContainer</code> 对象 <code>container</code>，然后通过把对象 <code>Foo</code> 的类型传递给 <code>container</code> 的 <code>getInstance</code> 方法，就可以<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">成功</span>获得一个对象 <code class="assertion" data-expect="equal" data-action="getInstanceClassName">Foo</code> 的实例 <code>foo</code>。</p>
 </div>
 
 <br />
