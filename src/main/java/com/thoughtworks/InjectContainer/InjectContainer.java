@@ -22,9 +22,9 @@ public class InjectContainer {
 
         Constructor<T> constructor = (Constructor<T>)injectableConstructors.get(0);
 
-        boolean isSingleton = clazz.isAnnotationPresent(Singleton.class);
+        boolean isSingletonClass = clazz.isAnnotationPresent(Singleton.class);
 
-        if (isSingleton) {
+        if (isSingletonClass) {
             Object singleton = singletonClasses.get(clazz);
             if (singleton != null) return (T)singleton;
         }
@@ -35,7 +35,7 @@ public class InjectContainer {
 
         creatingClasses.remove(clazz);
 
-        if (isSingleton) {
+        if (isSingletonClass) {
             singletonClasses.put(clazz, target);
         }
 
