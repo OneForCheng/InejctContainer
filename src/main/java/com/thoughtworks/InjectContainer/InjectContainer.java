@@ -25,15 +25,15 @@ public class InjectContainer {
     public  <T> T  getInstance(Class<T> clazz) {
         List<Constructor<?>> injectableConstructors = InjectHelper.getInjectableConstructors(clazz);
 
-        validateInjectableConstructors(clazz, injectableConstructors);
+        validateInjectableConstructorsOfClass(injectableConstructors, clazz);
 
         Constructor<T> constructor = (Constructor<T>)injectableConstructors.get(0);
 
         boolean isSingletonClass = clazz.isAnnotationPresent(Singleton.class);
 
         if (isSingletonClass) {
-            Object singleton = singletonClasses.get(clazz);
-            if (singleton != null) return (T)singleton;
+            Object instance = singletonClasses.get(clazz);
+            if (instance != null) return (T)instance;
         }
 
         creatingClasses.add(clazz);
@@ -51,7 +51,7 @@ public class InjectContainer {
 
     private <T> T createFromConstructor(Constructor<T> constructor) {
         Object[] params = Arrays.stream(constructor.getParameters()).map(param -> {
-            validateParameter(constructor, param);
+            validateParameterOfConstructor(param, constructor);
             return createFromParameter(param);
         }).toArray();
         try {
@@ -78,7 +78,7 @@ public class InjectContainer {
         return getInstance(clazz);
     }
 
-    private <T> void validateInjectableConstructors(Class<T> clazz, List<Constructor<?>> injectableConstructors) {
+    private <T> void validateInjectableConstructorsOfClass(List<Constructor<?>> injectableConstructors, Class<T> clazz) {
         int size = injectableConstructors.size();
         if (size == 0) {
             throw new InjectException(String.format("no accessible constructor for injection class %s", clazz.getSimpleName()));
@@ -88,7 +88,7 @@ public class InjectContainer {
         }
     }
 
-    private <T> void validateParameter(Constructor<T> constructor, Parameter param) {
+    private <T> void validateParameterOfConstructor(Parameter param, Constructor<T> constructor) {
         if (creatingClasses.contains(param.getType())) {
             throw new InjectException(String.format("circular dependency on constructor, the class is %s", constructor.getDeclaringClass().getSimpleName()));
         }
