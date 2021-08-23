@@ -4,7 +4,7 @@
 
 ### 1. 概述
 
-InjectContainer 是一个轻量级（简单实现）的依赖注入框架。简而言之，你可以通过引入 InjectContainer 提供的注解来声明需要自动注入的对象依赖，其创建和销毁过程完全将由 InjectContainer 框架自动完成。
+InjectContainer 是一个轻量级（简单实现）的依赖注入框架。简而言之，你可以通过引入 InjectContainer 提供的注解来声明需要自动注入的对象依赖，其创建过程完全将由 InjectContainer 框架自动完成。
 
 <br />
 
