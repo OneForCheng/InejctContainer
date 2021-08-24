@@ -1,4 +1,4 @@
-package com.thoughtworks.InjectContainer.models;
+package com.thoughtworks.InjectContainer.model;
 
 public class Seat {
     public String getType() {

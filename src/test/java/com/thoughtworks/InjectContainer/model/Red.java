@@ -1,4 +1,4 @@
-package com.thoughtworks.InjectContainer.models;
+package com.thoughtworks.InjectContainer.model;
 
 import com.thoughtworks.InjectContainer.annotation.Inject;
 

@@ -1,7 +1,7 @@
 package com.thoughtworks.InjectContainer;
 
-import com.thoughtworks.InjectContainer.models.BaseTest;
-import com.thoughtworks.InjectContainer.enums.ExecuteStatus;
+import com.thoughtworks.InjectContainer.model.BaseTest;
+import com.thoughtworks.InjectContainer.constant.ExecuteStatus;
 import com.thoughtworks.fusheng.integration.junit5.FuShengTest;
 
 import java.lang.reflect.InvocationTargetException;
