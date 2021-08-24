@@ -2,56 +2,57 @@ package com.thoughtworks.InjectContainer;
 
 import com.thoughtworks.InjectContainer.annotation.Singleton;
 import com.thoughtworks.InjectContainer.exception.InjectException;
-import com.thoughtworks.InjectContainer.util.InjectHelper;
+import com.thoughtworks.InjectContainer.resolver.QualifierResolver;
+import com.thoughtworks.InjectContainer.resolver.ConstructorResolver;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class InjectContainer {
     private final Set<Class<?>> creatingClasses = Collections.synchronizedSet(new HashSet<>());
 
     private final Map<Class<?>, Object> singletonClasses = Collections.synchronizedMap(new HashMap<>());
 
-    private final Map<Annotation, Class<?>> qualifiedClasses = Collections.synchronizedMap(new HashMap<>());
+    private final QualifierResolver qualifierResolver = new QualifierResolver();
 
     public void registerQualifiedClass(Class<?> clazz) {
-        List<Annotation> annotations = InjectHelper.getQualifierAnnotations(clazz.getAnnotations());
-        annotations.forEach(annotation -> qualifiedClasses.put(annotation, clazz));
+        qualifierResolver.registerQualifiedClass(clazz);
     }
 
     public  <T> T  getInstance(Class<T> clazz) {
-        List<Constructor<?>> injectableConstructors = InjectHelper.getInjectableConstructors(clazz);
-
-        validateInjectableConstructorsOfClass(injectableConstructors, clazz);
-
-        Constructor<T> constructor = (Constructor<T>)injectableConstructors.get(0);
+        T target;
 
         boolean isSingletonClass = clazz.isAnnotationPresent(Singleton.class);
+        Object instance = singletonClasses.get(clazz);
 
-        if (isSingletonClass) {
-            Object instance = singletonClasses.get(clazz);
-            if (instance != null) return (T)instance;
-        }
+        if (isSingletonClass && instance != null) {
+            target =  (T)instance;
+        } else {
+            creatingClasses.add(clazz);
 
-        creatingClasses.add(clazz);
+            target = createFromClass(clazz);
 
-        T target = createFromConstructor(constructor);
+            creatingClasses.remove(clazz);
 
-        creatingClasses.remove(clazz);
-
-        if (isSingletonClass) {
-            singletonClasses.put(clazz, target);
+            if (isSingletonClass) {
+                singletonClasses.put(clazz, target);
+            }
         }
 
         return target;
     }
 
+    private <T> T createFromClass(Class<T> clazz) {
+        Constructor<T> constructor = ConstructorResolver.getUniqueInjectableConstructor(clazz);
+        return createFromConstructor(constructor);
+    }
+
     private <T> T createFromConstructor(Constructor<T> constructor) {
         Object[] params = Arrays.stream(constructor.getParameters()).map(param -> {
-            validateParameterOfConstructor(param, constructor);
+            if (creatingClasses.contains(param.getType())) {
+                throw new InjectException(String.format("circular dependency on constructor, the class is %s", constructor.getDeclaringClass().getSimpleName()));
+            }
             return createFromParameter(param);
         }).toArray();
         try {
@@ -62,35 +63,10 @@ public class InjectContainer {
     }
 
     private Object createFromParameter(Parameter parameter) {
-        List<Annotation> annotations = InjectHelper.getQualifierAnnotations(parameter.getAnnotations());
-        if (!annotations.isEmpty()) {
-            Set<? extends Class<?>> registeredQualifiedClasses = annotations.stream().filter(qualifiedClasses::containsKey).map(qualifiedClasses::get).collect(Collectors.toSet());
-            int size = registeredQualifiedClasses.size();
-            if (size == 1) {
-                Class<?> clazz = registeredQualifiedClasses.iterator().next();
-                return getInstance(clazz);
-            } else if (size > 1) {
-                throw new InjectException(String.format("multiple injectable class %s for injection parameter %s because of using multiple annotations %s", registeredQualifiedClasses.stream().map(Class::getSimpleName).collect(Collectors.joining(",")), parameter.getType().getSimpleName(), annotations.stream().map(annotation -> annotation.annotationType().getSimpleName()).collect(Collectors.joining(","))));
-            }
-        }
+        Class<?> clazz = qualifierResolver.getUniqueRegisteredQualifiedClassOrNull(parameter);
 
-        Class<?> clazz = parameter.getType();
+        if (clazz == null) clazz = parameter.getType();
+
         return getInstance(clazz);
-    }
-
-    private <T> void validateInjectableConstructorsOfClass(List<Constructor<?>> injectableConstructors, Class<T> clazz) {
-        int size = injectableConstructors.size();
-        if (size == 0) {
-            throw new InjectException(String.format("no accessible constructor for injection class %s", clazz.getSimpleName()));
-        }
-        if (size > 1) {
-            throw new InjectException(String.format("multiple injectable constructor for injection class %s", clazz.getSimpleName()));
-        }
-    }
-
-    private <T> void validateParameterOfConstructor(Parameter param, Constructor<T> constructor) {
-        if (creatingClasses.contains(param.getType())) {
-            throw new InjectException(String.format("circular dependency on constructor, the class is %s", constructor.getDeclaringClass().getSimpleName()));
-        }
     }
 }
