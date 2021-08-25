@@ -24,12 +24,7 @@ public class InjectContainer {
         Object instance = singletonResolver.getSingletonOrNull(clazz);
 
         if (instance == null) {
-            creatingClasses.add(clazz);
-
             instance = createFromClass(clazz);
-
-            creatingClasses.remove(clazz);
-
             singletonResolver.tryRegisterSingleton(clazz, instance);
         }
 
@@ -37,12 +32,18 @@ public class InjectContainer {
     }
 
     private <T> T createFromClass(Class<T> clazz) {
+        creatingClasses.add(clazz);
+
         Constructor<T> constructor = ConstructorResolver.getUniqueInjectableConstructor(clazz);
-        return createFromConstructor(constructor);
+        T instance = createFromConstructor(constructor);
+
+        creatingClasses.remove(clazz);
+
+        return instance;
     }
 
     private <T> T createFromConstructor(Constructor<T> constructor) {
-        Object[] params = getConstructorParameters(constructor);
+        Object[] params = Arrays.stream(constructor.getParameters()).map(param -> createFromParameter(constructor, param)).toArray();
         try {
             return constructor.newInstance(params);
         } catch (Exception e) {
@@ -50,20 +51,14 @@ public class InjectContainer {
         }
     }
 
-    private <T> Object[] getConstructorParameters(Constructor<T> constructor) {
-        Object[] params = Arrays.stream(constructor.getParameters()).map(param -> {
-            if (creatingClasses.contains(param.getType())) {
-                throw new InjectException(String.format("circular dependency on constructor, the class is %s", constructor.getDeclaringClass().getSimpleName()));
-            }
-            return createFromParameter(param);
-        }).toArray();
-        return params;
-    }
-
-    private Object createFromParameter(Parameter parameter) {
+    private Object createFromParameter(Constructor<?> constructor, Parameter parameter) {
         Class<?> clazz = qualifierResolver.getUniqueRegisteredQualifiedClassOrNull(parameter);
 
         if (clazz == null) clazz = parameter.getType();
+
+        if (creatingClasses.contains(clazz)) {
+            throw new InjectException(String.format("circular dependency on constructor, the class is %s", constructor.getDeclaringClass().getSimpleName()));
+        }
 
         return getInstance(clazz);
     }
