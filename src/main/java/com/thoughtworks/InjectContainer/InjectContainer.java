@@ -42,17 +42,22 @@ public class InjectContainer {
     }
 
     private <T> T createFromConstructor(Constructor<T> constructor) {
+        Object[] params = getConstructorParameters(constructor);
+        try {
+            return constructor.newInstance(params);
+        } catch (Exception e) {
+            throw  new InjectException(String.format("create instance error from %s constructor", constructor.getDeclaringClass().getSimpleName()), e);
+        }
+    }
+
+    private <T> Object[] getConstructorParameters(Constructor<T> constructor) {
         Object[] params = Arrays.stream(constructor.getParameters()).map(param -> {
             if (creatingClasses.contains(param.getType())) {
                 throw new InjectException(String.format("circular dependency on constructor, the class is %s", constructor.getDeclaringClass().getSimpleName()));
             }
             return createFromParameter(param);
         }).toArray();
-        try {
-            return constructor.newInstance(params);
-        } catch (Exception e) {
-            throw  new InjectException(String.format("create instance error from %s constructor", constructor.getDeclaringClass().getSimpleName()), e);
-        }
+        return params;
     }
 
     private Object createFromParameter(Parameter parameter) {
