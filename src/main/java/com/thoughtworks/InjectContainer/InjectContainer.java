@@ -4,13 +4,14 @@ import com.thoughtworks.InjectContainer.exception.InjectException;
 import com.thoughtworks.InjectContainer.resolver.QualifierResolver;
 import com.thoughtworks.InjectContainer.resolver.ConstructorResolver;
 import com.thoughtworks.InjectContainer.resolver.SingletonResolver;
+import com.thoughtworks.InjectContainer.validator.CircularDependencyValidator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
 public class InjectContainer {
-    private final Set<Class<?>> creatingClasses = Collections.synchronizedSet(new HashSet<>());
+    private final CircularDependencyValidator circularDependencyValidator = new CircularDependencyValidator();
 
     private final SingletonResolver singletonResolver = new SingletonResolver();
 
@@ -21,6 +22,8 @@ public class InjectContainer {
     }
 
     public  <T> T  getInstance(Class<T> clazz) {
+        circularDependencyValidator.entry(clazz);
+
         Object instance = singletonResolver.getSingletonOrNull(clazz);
 
         if (instance == null) {
@@ -28,18 +31,14 @@ public class InjectContainer {
             singletonResolver.tryRegisterSingleton(clazz, instance);
         }
 
+        circularDependencyValidator.exit(clazz);
+
         return (T)instance;
     }
 
     private <T> T createFromClass(Class<T> clazz) {
-        creatingClasses.add(clazz);
-
         Constructor<T> constructor = ConstructorResolver.getUniqueInjectableConstructor(clazz);
-        T instance = createFromConstructor(constructor);
-
-        creatingClasses.remove(clazz);
-
-        return instance;
+        return createFromConstructor(constructor);
     }
 
     private <T> T createFromConstructor(Constructor<T> constructor) {
@@ -53,13 +52,7 @@ public class InjectContainer {
 
     private Object createFromParameter(Parameter parameter) {
         Class<?> clazz = qualifierResolver.getUniqueRegisteredQualifiedClassOrNull(parameter);
-
         if (clazz == null) clazz = parameter.getType();
-
-        if (creatingClasses.contains(clazz)) {
-            throw new InjectException(String.format("circular dependency on constructor for injection class %s", clazz.getSimpleName()));
-        }
-
         return getInstance(clazz);
     }
 }
