@@ -1,9 +1,9 @@
 package com.thoughtworks.InjectContainer;
 
-import com.thoughtworks.InjectContainer.annotation.Singleton;
 import com.thoughtworks.InjectContainer.exception.InjectException;
 import com.thoughtworks.InjectContainer.resolver.QualifierResolver;
 import com.thoughtworks.InjectContainer.resolver.ConstructorResolver;
+import com.thoughtworks.InjectContainer.resolver.SingletonResolver;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
@@ -12,7 +12,7 @@ import java.util.*;
 public class InjectContainer {
     private final Set<Class<?>> creatingClasses = Collections.synchronizedSet(new HashSet<>());
 
-    private final Map<Class<?>, Object> singletonClasses = Collections.synchronizedMap(new HashMap<>());
+    private final SingletonResolver singletonResolver = new SingletonResolver();
 
     private final QualifierResolver qualifierResolver = new QualifierResolver();
 
@@ -21,26 +21,19 @@ public class InjectContainer {
     }
 
     public  <T> T  getInstance(Class<T> clazz) {
-        T target;
+        Object instance = singletonResolver.getSingletonOrNull(clazz);
 
-        boolean isSingletonClass = clazz.isAnnotationPresent(Singleton.class);
-        Object instance = singletonClasses.get(clazz);
-
-        if (isSingletonClass && instance != null) {
-            target =  (T)instance;
-        } else {
+        if (instance == null) {
             creatingClasses.add(clazz);
 
-            target = createFromClass(clazz);
+            instance = createFromClass(clazz);
 
             creatingClasses.remove(clazz);
 
-            if (isSingletonClass) {
-                singletonClasses.put(clazz, target);
-            }
+            singletonResolver.tryRegisterSingleton(clazz, instance);
         }
 
-        return target;
+        return (T)instance;
     }
 
     private <T> T createFromClass(Class<T> clazz) {
