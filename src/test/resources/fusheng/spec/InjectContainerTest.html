@@ -121,11 +121,11 @@ public class Blue {
 }
 
 InjectContainer container = new InjectContainer();
-Red red = (Red)container.getInstance(Red.class); // Throw Exception: circular dependency on constructor, the class is Blue
-Blue b = (Blue)container.getInstance(Blue.class); // Throw Exception: circular dependency on constructor, the class is Red
+Red red = (Red)container.getInstance(Red.class); // Throw Exception: circular dependency on constructor for injection class Red
+Blue b = (Blue)container.getInstance(Blue.class); // Throw Exception: circular dependency on constructor for injection class Blue
 </code></pre>
   <p>
-    当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code class="variable" data-name="className">Red</code> 的实例时，通过扫描对象 <code>Red</code> 的构造函数，可以成功地获取到带有 <code>@Inject</code> 注解的带参构造函数 <code>Red</code>，进而尝试自动创建其依赖的参数 <code>blue</code>，但创建对象 <code>Blue</code> 的实例的时候会发现其依赖对象 Red 的实例，因而形成了一个循环的依赖，导致无法自动的创建相应的依赖，最终将会执行<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">circular dependency on constructor, the class is Blue</span> 。
+    当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code class="variable" data-name="className">Red</code> 的实例时，通过扫描对象 <code>Red</code> 的构造函数，可以成功地获取到带有 <code>@Inject</code> 注解的带参构造函数 <code>Red</code>，进而尝试自动创建其依赖的参数 <code>blue</code>，但创建对象 <code>Blue</code> 的实例的时候会发现其依赖对象 Red 的实例，因而形成了一个循环的依赖，导致无法自动的创建相应的依赖，最终将会执行<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">circular dependency on constructor for injection class Red</span> 。
     <span>获取 <code>Blue</code> 的实例同理。</span>
   </p>
 </div>

@@ -43,7 +43,7 @@ public class InjectContainer {
     }
 
     private <T> T createFromConstructor(Constructor<T> constructor) {
-        Object[] params = Arrays.stream(constructor.getParameters()).map(param -> createFromParameter(constructor, param)).toArray();
+        Object[] params = Arrays.stream(constructor.getParameters()).map(this::createFromParameter).toArray();
         try {
             return constructor.newInstance(params);
         } catch (Exception e) {
@@ -51,13 +51,13 @@ public class InjectContainer {
         }
     }
 
-    private Object createFromParameter(Constructor<?> constructor, Parameter parameter) {
+    private Object createFromParameter(Parameter parameter) {
         Class<?> clazz = qualifierResolver.getUniqueRegisteredQualifiedClassOrNull(parameter);
 
         if (clazz == null) clazz = parameter.getType();
 
         if (creatingClasses.contains(clazz)) {
-            throw new InjectException(String.format("circular dependency on constructor, the class is %s", constructor.getDeclaringClass().getSimpleName()));
+            throw new InjectException(String.format("circular dependency on constructor for injection class %s", clazz.getSimpleName()));
         }
 
         return getInstance(clazz);

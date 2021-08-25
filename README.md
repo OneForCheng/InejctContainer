@@ -130,11 +130,11 @@ public class Blue {
 }
 
 InjectContainer container = new InjectContainer();
-Red red = (Red)container.getInstance(Red.class); // Throw Exception: circular dependency on constructor, the class is Blue
-Blue b = (Blue)container.getInstance(Blue.class); // Throw Exception: circular dependency on constructor, the class is Red
+Red red = (Red)container.getInstance(Red.class); // Throw Exception: circular dependency on constructor for injection class Red
+Blue b = (Blue)container.getInstance(Blue.class); // Throw Exception: circular dependency on constructor for injection class Blue
 ```
 
-当 `container` 使用 `getInstance` 方法去获取对象 `Red` 的实例时，通过扫描对象 `Red` 的构造函数，可以成功地获取到带有 `@Inject` 注解的带参构造函数 `Red`，进而尝试自动创建其依赖的参数 `blue`，但创建对象 `Blue` 的实例的时候会发现其依赖对象 Red 的实例，因而形成了一个循环的依赖，导致无法自动的创建相应的依赖，最终将会执行失败并抛出异常： circular dependency on constructor, the class is Blue 。 获取 `Blue` 的实例同理。
+当 `container` 使用 `getInstance` 方法去获取对象 `Red` 的实例时，通过扫描对象 `Red` 的构造函数，可以成功地获取到带有 `@Inject` 注解的带参构造函数 `Red`，进而尝试自动创建其依赖的参数 `blue`，但创建对象 `Blue` 的实例的时候会发现其依赖对象 Red 的实例，因而形成了一个循环的依赖，导致无法自动的创建相应的依赖，最终将会执行失败并抛出异常： circular dependency on constructor for injection class Red 。 获取 `Blue` 的实例同理。
 
 <br />
 
