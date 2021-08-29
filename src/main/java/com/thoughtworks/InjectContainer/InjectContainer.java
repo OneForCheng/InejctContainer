@@ -21,6 +21,14 @@ public class InjectContainer {
         qualifierResolver.registerQualifiedClass(clazz);
     }
 
+    public void registerInterfaceImplementation(Class<?> registerInterface, Class<?> clazz) {
+
+    }
+
+    public <T> T[] getInterfaceInstances(Class<T> clazz) {
+        return null;
+    }
+
     public  <T> T  getInstance(Class<T> clazz) {
         circularDependencyValidator.entry(clazz);
 

@@ -9,6 +9,7 @@
   - Inject
   - Singleton
   - Named
+- 获取接口的实例组
 - 异常处理
   - 无可注入的构造函数
   - 多个可注入的构造函数
@@ -171,6 +172,42 @@ assertEquals(car.getPassengerSeatType(), "passengerSeat") // 断言正确
 ```
 
 可以看到，创建了 `container` 实例之后，同样通过其 `registerQualifiedClass` 方法将被 `@Named` 标识的 `DriverSeat`  对象和 `PassengerSeat` 对象都添加到别名注解列表中。当 `container` 使用 `getInstance` 方法去获取对象 `Car` 的实例时，会发现对象 `Car` 的构造函数的 `driverSeat` 参数和 `passengerSeat` 参数都被 `@Named` 标识，会优先去别名注解列表中查找，会发现都可以找到相应的别名注解记录的对象，因此将会使用别名注解对应的 `DriverSeat` 对象和 `PassengerSeat` 对象去构造参数的实例，最终可以成功地获得对象 `Car` 的实例。也因此当调用实例 `car` 的 `getDriverSeatType` 方法时会返回 `driverSeat` ，而调用 `getPassengerSeatType` 方法会返回 `passengerSeat`。
+
+<br />
+
+### 获取接口的实例组
+
+<br />
+
+除了普通对象的依赖注入，考虑到一些特殊场景，有时可能需要直接获取继承了同一接口的多个对象的实例组或者作为依赖注入参数，而 InjectContainer 对此也支持。
+
+<br />
+
+如下，对象 `Dog` 和对象 `Bird` 都继承了接口 `Animal`：
+
+```java
+public interface Animal {
+    public String getType();
+}
+
+public class Dog implements Animal {
+    public String getType() { return "dog"; }
+}
+
+public class Bird implements Animal {
+    public String getType() { return "bird"; }
+}
+
+InjectContainer container = new InjectContainer();
+cantainer.registerInterfaceImplementation(Animal.class, Dog.class);
+cantainer.registerInterfaceImplementation(Animal.class, Bird.class);
+Animal[] animals = (Animal[])container.getInterfaceInstances(Animal.class); // 可以正确获取 Animal 的实例组
+assertEquals(animals.length, 2) // 断言正确
+assertEquals(animals[0].getType(), "dog") // 断言正确
+assertEquals(animals[1].getType(), "bird") // 断言正确
+```
+
+创建了 `container` 实例之后，通过调用其 `registerInterfaceImplementation` 方法将接口 `Animal` 和实现了该接口的对象 `Dog` 和对象 `Bird`  注册到了接口实现列表中，当 `container` 使用 `getInterfaceInstances` 方法去获取接口 `Animal` 的实例数组时，最终可以成功的获取到实现了接口 `Animal` 的对象实例数组，第 1 个和第 2 个分别是对象 `Dog` 和 `Bird` 的实例。
 
 <br />
 

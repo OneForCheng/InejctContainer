@@ -18,6 +18,7 @@
 
     </ul>
   </li>
+  <li><p>获取接口的实例组</p>
   <li><p>异常处理</p>
     <ul>
       <li>无可注入的构造函数</li>
@@ -173,6 +174,39 @@ assertEquals(car.getDriverSeatType(), &quot;driverSeat&quot;) // 断言正确
 assertEquals(car.getPassengerSeatType(), &quot;passengerSeat&quot;) // 断言正确
 </code></pre>
   <p>可以看到，创建了 <code>container</code> 实例之后，同样通过其 <code>registerQualifiedClass</code> 方法将被 <code>@Named</code> 标识的 <span class="function" data-action="registerQualifiedClass" data-params="driverSeatQualifier"><code class="variable" data-name="driverSeatQualifier">DriverSeat</code></span>  对象和 <span class="function" data-action="registerQualifiedClass" data-params="passengerSeatQualifier"><code class="variable" data-name="passengerSeatQualifier">PassengerSeat</code></span> 对象都添加到别名注解列表中。当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code>Car</code> 的实例时，会发现对象 <code>Car</code> 的构造函数的 <code>driverSeat</code> 参数和 <code>passengerSeat</code> 参数都被 <code>@Named</code> 标识，会优先去别名注解列表中查找，会发现都可以找到相应的别名注解记录的对象，因此将会使用别名注解对应的 <code>DriverSeat</code> 对象和 <code>PassengerSeat</code> 对象去构造参数的实例，最终可以<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">成功</span>地获得对象 <code class="assertion" data-expect="equal" data-action="getInstanceClassName">Car</code> 的实例。也因此当调用实例 <code>car</code> 的 <code class="variable" data-name="driverSeatTypeMethod">getDriverSeatType</code> 方法时会返回 <code class="assertion" data-expect="equal" data-action="invokeInstanceMethodWithReturnValue" data-params="driverSeatTypeMethod">driverSeat</code> ，而调用 <code class="variable" data-name="passengerSeatTypeMethod">getPassengerSeatType</code> 方法会返回 <code class="assertion" data-expect="equal" data-action="invokeInstanceMethodWithReturnValue" data-params="passengerSeatTypeMethod">passengerSeat</code>。</p>
+</div>
+
+<br>
+
+<h3 id='获取接口的实例组'>获取接口的实例组</h3>
+<br>
+<p>除了普通对象的依赖注入，考虑到一些特殊场景，有时可能需要直接获取继承了同一接口的多个对象的实例组或者作为依赖注入参数，而 InjectContainer 对此也支持。</p>
+
+<br>
+
+<div class="example">
+  <p>如下，对象 <code>Dog</code> 和对象 <code>Bird</code> 都继承了接口 <span  class="function" data-action="setCurrentRegisterInterface" data-params="currentInterface"><code class="variable" data-name="currentInterface">Animal</code></span>：</p>
+  <pre><code class='language-java' lang='java'>public interface Animal {
+    public String getType();
+}
+
+public class Dog implements Animal {
+    public String getType() { return &quot;dog&quot;; }
+}
+
+public class Bird implements Animal {
+    public String getType() { return &quot;bird&quot;; }
+}
+
+InjectContainer container = new InjectContainer();
+cantainer.registerInterfaceImplementation(Animal.class, Dog.class);
+cantainer.registerInterfaceImplementation(Animal.class, Bird.class);
+Animal[] animals = (Animal[])container.getInterfaceInstances(Animal.class); // 可以正确获取 Animal 的实例组
+assertEquals(animals.length, 2) // 断言正确
+assertEquals(animals[0].getType(), &quot;dog&quot;) // 断言正确
+assertEquals(animals[1].getType(), &quot;bird&quot;) // 断言正确
+</code></pre>
+  <p>创建了 <code>container</code> 实例之后，通过调用其 <code>registerInterfaceImplementation</code> 方法将接口 <code>Animal</code> 和实现了该接口的对象 <span  class="function" data-action="registerInterfaceImplementation" data-params="dogClass"><code class="variable" data-name="dogClass">Dog</code></span> 和对象 <span  class="function" data-action="registerInterfaceImplementation" data-params="birdClass"><code class="variable" data-name="birdClass">Dog</code></span>  注册到了接口实现列表中，当 <code>container</code> 使用 <code>getInterfaceInstances</code> 方法去获取接口 <code class="variable" data-name="animalInterface">Animal</code> 的实例数组时，最终可以<span class="assertion" data-expect="equal" data-action="getInterfaceInstances" data-params="animalInterface">成功</span>的获取到实现了接口 <code>Animal</code> 的对象实例数组，第 <span class="variable" data-name="firstSerialNumber">1</span> 个和第 <span class="variable" data-name="secondSerialNumber">2</span> 个分别是对象 <code class="assertion" data-expect="equal" data-action="getInterfaceInstanceClassName" data-params="firstSerialNumber">Dog</code> 和 <code class="assertion" data-expect="equal" data-action="getInterfaceInstanceClassName" data-params="firstSerialNumber">Bird</code> 的实例。</p>
 </div>
 
 <br>
