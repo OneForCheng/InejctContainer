@@ -5,59 +5,41 @@
   <title>InjectContainer教程</title>
 </head>
 <body>
-<h3 id="1-概述">1. 概述</h3>
+
+<h3 id='目录'>目录</h3>
+<ul>
+  <li><p>概述</p>
+  </li>
+  <li><p>基本功能</p>
+    <ul>
+      <li>Inject</li>
+      <li>Singleton</li>
+      <li>Named</li>
+
+    </ul>
+  </li>
+  <li><p>异常处理</p>
+    <ul>
+      <li>无可注入的构造函数</li>
+      <li>多个可注入的构造函数</li>
+      <li>循环依赖</li>
+
+    </ul>
+  </li>
+
+</ul>
+
+<br>
+
+<h3 id='概述'>概述</h3>
 <p>InjectContainer 是一个轻量级（简单实现）的依赖注入框架。简而言之，你可以通过引入 InjectContainer 提供的注解来声明需要自动注入的对象依赖，其创建过程完全将由 InjectContainer 框架自动完成。</p>
-<br />
-<h3 id="2-一个简单样例">2. 一个简单样例</h3>
-<p>通过一个简单的样例来了解一下如何使用 <code>InjectContainer</code>。</p>
+<br>
+<h3 id='基本功能'>基本功能</h3>
+<br>
+<h5 id='1-使用-inject-注解'>1. 使用 @Inject 注解</h5>
 
 <br />
 
-<div class="example">
-  <p>如下，<code class="variable" data-name="className">Foo</code> 是一个具有默认构造函数（无参构造函数）的对象：</p>
-  <pre><code class="language-java" lang="java">public class Foo {
-  public Foo() {}
-}
-
-InjectContainer container = new InjectContainer();
-Foo foo = (Foo)container.getInstance(Foo.class); // 可以正确获取 Foo 的实例
-</code></pre>
-  <p>首先，实例化一个 <code>InjectContainer</code> 对象 <code>container</code>，然后通过把对象 <code>Foo</code> 的类型传递给 <code>container</code> 的 <code>getInstance</code> 方法，就可以<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">成功</span>获得一个对象 <code class="assertion" data-expect="equal" data-action="getInstanceClassName">Foo</code> 的实例 <code>foo</code>。</p>
-</div>
-
-<br />
-
-<div class="example">
-  <p>但如果对象没有一个共有的构造函数，如下对象 <code class="variable" data-name="className">Bar</code> ：</p>
-  <pre><code class="language-java" lang="java">public class Bar {
-  private Bar() {}
-}
-
-InjectContainer container = new InjectContainer();
-Bar bar = (Bar)container.getInstance(Bar.class); // Throw Exception: no accessible constructor for injection class Bar
-</code></pre>
-  <p>那么当用 <code>container</code> 的 <code>getInstance</code> 方法去获取对象 <code>Bar</code> 的实例时，将会<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">no accessible constructor for injection class Bar</span> 。</p>
-</div>
-
-<br />
-
-<div class="example">
-  <p>另外，如果对象带有一个有参构造函数，如下对象 <code class="variable" data-name="className">Baz</code> ：</p>
-  <pre><code class="language-java" lang="java">public class Baz {
-  public Baz(Qux qux) {}
-}
-
-public class Qux {}
-
-InjectContainer container = new InjectContainer();
-Baz baz = (Baz)container.getInstance(Baz.class); // Throw Exception: no accessible constructor for injection class Baz
-</code></pre>
-  <p>同样用 <code>container</code> 的 <code>getInstance</code> 方法去获取对象 <code>Baz</code> 的实例时，将会<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常：<span class="assertion" data-expect="equal" data-action="getExceptionMessage">no accessible constructor for injection class Baz</span>。因为对象 Baz 的构造函数并没有用 <code>@Inject</code> 注解来声明，那么 <code>container</code> 就不会将构造函数 <code>Baz</code> 中的参数 <code>qux</code> 识别为需要自动注入的对象，所以无法创建对象 <code>Baz</code> 的实例。</p>
-</div>
-
-<br />
-
-<h3 id="3-使用-inject-注解">3. 使用 @Inject 注解</h3>
 <p>通过使用 <code>@Inject</code> 注解来声明对象的构造函数，使其参数可以自动注入。</p>
 
 <br />
@@ -80,80 +62,20 @@ Fred fred = (Fred)container.getInstance(Fred.class); // 可以正确获取 Fred 
 <br />
 
 <div class="example">
-  <p>不过，如果考虑对象有多个共有的构造函数，如下对象 <code class="variable" data-name="className">Thud</code> ：</p>
-  <pre><code class="language-java" lang="java">public class Thud {
-  public Thud() {}
-
-  @Inject
-  public Thud(Qux qux) {}
-}
-
-// 或者
-
-public class Thud {
-  @Inject
-  public Thud(int i) {}
-
-  @Inject
-  public Thud(Qux qux) {}
-}
-
-public class Qux {}
-
-InjectContainer container = new InjectContainer();
-Thud thud = (Thud)container.getInstance(Thud.class); // Throw Exception: multiple injectable constructor for injection class Thud
-</code></pre>
-  <p>当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code>Thud</code> 的实例时，由于扫描到对象 <code>Thud</code> 有多个可以自动注入的构造函数，不知道应该用哪一个构造函数来实例化对象 <code>Thud</code>，因此将会<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">multiple injectable constructor for injection class Thud</span> 。</p>
-</div>
-
-<br />
-
-<div class="example">
-  <p>另外，如果依赖注入的对象存在循环依赖：</p>
-  <pre><code class="language-java" lang="java">public class Red {
-  @Inject
-  public Red(Blue blue) {}
-}
-
-public class Blue {
-  @Inject
-  public Blue(Red Red) {}
+  <p>当然，存在一种特殊情况，可以省略  <code>@Inject</code>  注解，那就是对于无参构造函数。如下，<code class="variable" data-name="className">Foo</code> 是一个具有默认构造函数（无参构造函数）的对象：</p>
+  <pre><code class="language-java" lang="java">public class Foo {
+  public Foo() {}
 }
 
 InjectContainer container = new InjectContainer();
-Red red = (Red)container.getInstance(Red.class); // Throw Exception: circular dependency on constructor for injection class Red
-Blue b = (Blue)container.getInstance(Blue.class); // Throw Exception: circular dependency on constructor for injection class Blue
+Foo foo = (Foo)container.getInstance(Foo.class); // 可以正确获取 Foo 的实例
 </code></pre>
-  <p>
-    当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code class="variable" data-name="className">Red</code> 的实例时，通过扫描对象 <code>Red</code> 的构造函数，可以成功地获取到带有 <code>@Inject</code> 注解的带参构造函数 <code>Red</code>，进而尝试自动创建其依赖的参数 <code>blue</code>，但创建对象 <code>Blue</code> 的实例的时候会发现其依赖对象 Red 的实例，因而形成了一个循环的依赖，导致无法自动的创建相应的依赖，最终将会执行<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">circular dependency on constructor for injection class Red</span> 。
-    <span>获取 <code>Blue</code> 的实例同理。</span>
-  </p>
+  <p>实例化一个 <code>InjectContainer</code> 对象 <code>container</code>，然后通过把对象 <code>Foo</code> 的类型传递给 <code>container</code> 的 <code>getInstance</code> 方法，就可以<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">成功</span>获得一个对象 <code class="assertion" data-expect="equal" data-action="getInstanceClassName">Foo</code> 的实例 <code>foo</code>。</p>
 </div>
 
 <br />
 
-<div>
-  <p>最后，如果我们将 <code>@Inject</code> 注解不只用在对象的构造函数上，也尝试应用于字段或方法上：。也就是 InjectContainer 中 的  <code>@Inject</code> 注解只能用于构造函数之上。</p>
-  <pre><code class="language-java" lang="java">public class Fum {
-  @Inject
-  public Fum(Foo foo) {}
-
-  @Inject  // '@Inject' not applicable to field
-  public Qux qux;
-
-  @Inject  // '@Inject' not applicable to method
-  private void install(Foo foo)
-}
-
-public class Foo {}
-public class Qux {}
-</code></pre>
-  <p>可以看到，编辑器或运行程序时将会提醒： <code>@Inject</code> 对于字段或方法不适用</p>
-</div>
-
-<br />
-
-<h3 id='4-使用-singleton-注解'>4. 使用 @Singleton 注解</h3>
+<h5 id='2-使用-singleton-注解'>2. 使用 @Singleton 注解</h5>
 <p>通过使用 <code>@Singleton</code> 注解标识对象，当对象作为依赖被注入时会是对象的同一个实例。</p>
 
 <br>
@@ -186,7 +108,7 @@ assertEquals(jim.isSame(), true) // 断言正确
 
 <br>
 
-<h3 id='5-使用-named-注解'>5. 使用 @Named 注解</h3>
+<h5 id='3-使用-named-注解'>3. 使用 @Named 注解</h5>
 <p>通过使用 <code>@Named</code> 注解标识对象，然后在构造函数相应的参数中使用同名的注解标识参数，InjectContainer 在解析参数时会优先判断是否使用了别名注解，如果使用了则会优先去别名注解列表中查找相应对象，找到则将构造相应实例，如果没有找到，则继续使用原参数的类型构造相应实例。</p>
 
 <br>
@@ -254,6 +176,103 @@ assertEquals(car.getPassengerSeatType(), &quot;passengerSeat&quot;) // 断言正
 </div>
 
 <br>
+
+<h3 id='异常处理'>异常处理</h3>
+<br>
+<p>针对一些特殊情况，由于存在某种歧义或冲突，会导致无法成功地自动构造对象。</p>
+<br>
+<h5 id='1-无可注入的构造函数'>1. 无可注入的构造函数</h5>
+
+<div class="example">
+  <p>对象 <code class="variable" data-name="className">Bar</code> 没有一个共有的构造函数，如下：</p>
+  <pre><code class="language-java" lang="java">public class Bar {
+  private Bar() {}
+}
+
+InjectContainer container = new InjectContainer();
+Bar bar = (Bar)container.getInstance(Bar.class); // Throw Exception: no accessible constructor for injection class Bar
+</code></pre>
+  <p>那么当用 <code>container</code> 的 <code>getInstance</code> 方法去获取对象 <code>Bar</code> 的实例时，将会<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">no accessible constructor for injection class Bar</span> 。</p>
+</div>
+
+<br />
+
+<div class="example">
+  <p>另外，如果对象带有一个有参构造函数，如下对象 <code class="variable" data-name="className">Baz</code> ：</p>
+  <pre><code class="language-java" lang="java">public class Baz {
+  public Baz(Qux qux) {}
+}
+
+public class Qux {}
+
+InjectContainer container = new InjectContainer();
+Baz baz = (Baz)container.getInstance(Baz.class); // Throw Exception: no accessible constructor for injection class Baz
+</code></pre>
+  <p>同样用 <code>container</code> 的 <code>getInstance</code> 方法去获取对象 <code>Baz</code> 的实例时，将会<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常：<span class="assertion" data-expect="equal" data-action="getExceptionMessage">no accessible constructor for injection class Baz</span>。因为对象 Baz 的构造函数并没有用 <code>@Inject</code> 注解来声明，那么 <code>container</code> 就不会将构造函数 <code>Baz</code> 中的参数 <code>qux</code> 识别为需要自动注入的对象，所以无法创建对象 <code>Baz</code> 的实例。</p>
+</div>
+
+<br />
+
+<h5 id='2-多个可注入的构造函数'>2. 多个可注入的构造函数</h5>
+
+<br />
+
+<div class="example">
+  <p>不过，如果考虑对象有多个共有的构造函数，如下对象 <code class="variable" data-name="className">Thud</code> ：</p>
+  <pre><code class="language-java" lang="java">public class Thud {
+  public Thud() {}
+
+  @Inject
+  public Thud(Qux qux) {}
+}
+
+// 或者
+
+public class Thud {
+  @Inject
+  public Thud(int i) {}
+
+  @Inject
+  public Thud(Qux qux) {}
+}
+
+public class Qux {}
+
+InjectContainer container = new InjectContainer();
+Thud thud = (Thud)container.getInstance(Thud.class); // Throw Exception: multiple injectable constructor for injection class Thud
+</code></pre>
+  <p>当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code>Thud</code> 的实例时，由于扫描到对象 <code>Thud</code> 有多个可以自动注入的构造函数，不知道应该用哪一个构造函数来实例化对象 <code>Thud</code>，因此将会<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">multiple injectable constructor for injection class Thud</span> 。</p>
+</div>
+
+<br />
+
+<h5 id='3-循环依赖'>3. 循环依赖</h5>
+
+<br />
+
+<div class="example">
+  <p>对象 <code>Red</code> 的构造依赖于对象 <code>Blue</code> ，而对象 <code>Blue</code>  的构造依赖于对象 <code>Red</code> ，如下：</p>
+  <pre><code class="language-java" lang="java">public class Red {
+  @Inject
+  public Red(Blue blue) {}
+}
+
+public class Blue {
+  @Inject
+  public Blue(Red Red) {}
+}
+
+InjectContainer container = new InjectContainer();
+Red red = (Red)container.getInstance(Red.class); // Throw Exception: circular dependency on constructor for injection class Red
+Blue b = (Blue)container.getInstance(Blue.class); // Throw Exception: circular dependency on constructor for injection class Blue
+</code></pre>
+  <p>
+    当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code class="variable" data-name="className">Red</code> 的实例时，通过扫描对象 <code>Red</code> 的构造函数，可以成功地获取到带有 <code>@Inject</code> 注解的带参构造函数 <code>Red</code>，进而尝试自动创建其依赖的参数 <code>blue</code>，但创建对象 <code>Blue</code> 的实例的时候会发现其依赖对象 Red 的实例，因而形成了一个循环的依赖，导致无法自动的创建相应的依赖，最终将会执行<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">失败</span>并抛出异常： <span class="assertion" data-expect="equal" data-action="getExceptionMessage">circular dependency on constructor for injection class Red</span> 。
+    <span>获取 <code>Blue</code> 的实例同理。</span>
+  </p>
+</div>
+
+<br />
 
 </body>
 </html>
