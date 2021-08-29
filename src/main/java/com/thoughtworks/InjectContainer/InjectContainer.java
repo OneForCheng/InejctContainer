@@ -34,10 +34,6 @@ public class InjectContainer {
     }
 
     public <T> T[] getInterfaceInstances(Class<T> clazz) {
-        if (!clazz.isInterface()) {
-            throw  new InjectException(String.format("%s is not interface", clazz.getDeclaringClass().getSimpleName()));
-        }
-
         Set<Class<?>> classes = interfaceImplementations.get(clazz);
 
         if (classes == null) {
