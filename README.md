@@ -187,15 +187,15 @@ assertEquals(car.getPassengerSeatType(), "passengerSeat") // 断言正确
 
 ```java
 public interface Animal {
-    public String getType();
+  public String getType();
 }
 
 public class Dog implements Animal {
-    public String getType() { return "dog"; }
+  public String getType() { return "dog"; }
 }
 
 public class Bird implements Animal {
-    public String getType() { return "bird"; }
+  public String getType() { return "bird"; }
 }
 
 InjectContainer container = new InjectContainer();
@@ -208,6 +208,43 @@ assertEquals(animals[1].getType(), "bird") // 断言正确
 ```
 
 创建了 `container` 实例之后，通过调用其 `registerInterfaceImplementation` 方法将接口 `Animal` 和实现了该接口的对象 `Dog` 和对象 `Bird`  注册到了接口实现列表中，当 `container` 使用 `getInterfaceInstances` 方法去获取接口 `Animal` 的实例数组时，最终可以成功的获取到实现了接口 `Animal` 的对象实例数组，第 1 个和第 2 个分别是对象 `Dog` 和 `Bird` 的实例。
+
+<br />
+
+除了可以直接获取实现了接口的实例数组之外，也可以作为依赖注入参数，如下在对象 `Zoo` 的构造函数中：
+
+```java
+public interface Animal {
+  public String getType();
+}
+
+public class Dog implements Animal {
+  public String getType() { return "dog"; }
+}
+
+public class Bird implements Animal {
+  public String getType() { return "bird"; }
+}
+
+public class Zoo {
+  private Animal[] animals;
+
+  @Inject
+  public Zoo(Animal[] animals) {
+    this.animals = animals;
+  }
+
+  public int getAnimalTotalCount() { return animals.length; }
+}
+
+InjectContainer container = new InjectContainer();
+cantainer.registerInterfaceImplementation(Animal.class, Dog.class);
+cantainer.registerInterfaceImplementation(Animal.class, Bird.class);
+Zoo zoo = (Zoo)container.getInstance(Zoo.class); // 可以正确获取 Zoo 的实例
+assertEquals(zoo.getAnimalTotalCount(), 2) // 断言正确
+```
+
+创建了 `container` 实例之后，同样通过调用其 `registerInterfaceImplementation` 方法将接口 `Animal` 和实现了该接口的对象 `Dog` 和对象 `Bird`  注册到了接口实现列表中，当 `container` 使用 `getInstance` 方法去获取对象 `Zoo` 的实例时，会发现依赖参数是一个接口数组，会从已注册的接口实现列表中查找相应的对象。最终可以成功的获取到对象 `Zoo` 的实例，调用其的  `getAnimalTotalCount` 方法会返回 2 。
 
 <br />
 

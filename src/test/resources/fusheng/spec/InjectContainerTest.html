@@ -211,6 +211,42 @@ assertEquals(animals[1].getType(), &quot;bird&quot;) // 断言正确
 
 <br>
 
+<div class="example">
+  <p>除了可以直接获取实现了接口的实例数组之外，也可以作为依赖注入参数，如下在对象 <code class="variable" data-name="className">Zoo</code> 的构造函数中：</p>
+  <pre><code class='language-java' lang='java'>public interface Animal {
+  public String getType();
+}
+
+public class Dog implements Animal {
+  public String getType() { return &quot;dog&quot;; }
+}
+
+public class Bird implements Animal {
+  public String getType() { return &quot;bird&quot;; }
+}
+
+public class Zoo {
+  private Animal[] animals;
+
+  @Inject
+  public Zoo(Animal[] animals) {
+    this.animals = animals;
+  }
+
+  public int getAnimalTotalCount() { return animals.length; }
+}
+
+InjectContainer container = new InjectContainer();
+cantainer.registerInterfaceImplementation(Animal.class, Dog.class);
+cantainer.registerInterfaceImplementation(Animal.class, Bird.class);
+Zoo zoo = (Zoo)container.getInstance(Zoo.class); // 可以正确获取 Zoo 的实例
+assertEquals(zoo.getAnimalTotalCount(), 2) // 断言正确
+</code></pre>
+  <p>创建了 <code>container</code> 实例之后，同样通过调用其 <code>registerInterfaceImplementation</code> 方法将接口 <code>Animal</code> 和实现了该接口的对象 <span  class="function" data-action="registerInterfaceImplementation" data-params="dogClass"><code class="variable" data-name="dogClass">Dog</code></span> 和对象 <span  class="function" data-action="registerInterfaceImplementation" data-params="birdClass"><code class="variable" data-name="birdClass">Bird</code></span>  注册到了接口实现列表中，当 <code>container</code> 使用 <code>getInstance</code> 方法去获取对象 <code>Zoo</code> 的实例时，会发现依赖参数是一个接口数组，会从已注册的接口实现列表中查找相应的对象。最终可以<span class="assertion" data-expect="equal" data-action="getInstance" data-params="className">成功</span>的获取到对象 <code class="assertion" data-expect="equal" data-action="getInstanceClassName">Zoo</code> 的实例，调用其的  <code class="variable" data-name="methodName">getAnimalTotalCount</code> 方法会返回 <span class="assertion" data-expect="equal" data-action="invokeInstanceMethodWithReturnValue" data-params="methodName">2</span> 。</p>
+</div>
+
+<br>
+
 <h3 id='异常处理'>异常处理</h3>
 <br>
 <p>针对一些特殊情况，由于存在某种歧义或冲突，会导致无法成功地自动构造对象。</p>

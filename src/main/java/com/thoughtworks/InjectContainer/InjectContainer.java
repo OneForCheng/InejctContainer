@@ -6,6 +6,7 @@ import com.thoughtworks.InjectContainer.resolver.ConstructorResolver;
 import com.thoughtworks.InjectContainer.resolver.SingletonResolver;
 import com.thoughtworks.InjectContainer.validator.CircularDependencyValidator;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.*;
@@ -40,7 +41,15 @@ public class InjectContainer {
             return null;
         }
 
-        return (T[])classes.stream().map(this::getInstance).toArray();
+        T[] instances = (T[]) Array.newInstance(clazz, classes.size());
+
+        int index = 0;
+        for (Class<?> item : classes) {
+            instances[index] = (T) getInstance(item);
+            index++;
+        }
+
+        return instances;
     }
 
     public  <T> T  getInstance(Class<T> clazz) {
@@ -64,12 +73,22 @@ public class InjectContainer {
     }
 
     private <T> T createFromConstructor(Constructor<T> constructor) {
-        Object[] params = Arrays.stream(constructor.getParameters()).map(this::createFromParameter).toArray();
+        Object[] params = Arrays.stream(constructor.getParameters()).map(parameter -> {
+            if (parameter.getType().isArray()) {
+                return createFromArrayParameter(parameter);
+            }
+            return createFromParameter(parameter);
+        }).toArray();
         try {
             return constructor.newInstance(params);
         } catch (Exception e) {
             throw  new InjectException(String.format("create instance error from %s constructor", constructor.getDeclaringClass().getSimpleName()), e);
         }
+    }
+
+    private Object[] createFromArrayParameter(Parameter parameter) {
+        Class<?> clazz = parameter.getType().getComponentType();
+        return getInterfaceInstances(clazz);
     }
 
     private Object createFromParameter(Parameter parameter) {
