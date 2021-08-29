@@ -17,16 +17,34 @@ public class InjectContainer {
 
     private final QualifierResolver qualifierResolver = new QualifierResolver();
 
+    private final Map<Class<?>, Set<Class<?>>> interfaceImplementations = Collections.synchronizedMap(new HashMap<>());
+
     public void registerQualifiedClass(Class<?> clazz) {
         qualifierResolver.registerQualifiedClass(clazz);
     }
 
     public void registerInterfaceImplementation(Class<?> registerInterface, Class<?> clazz) {
-
+        if (interfaceImplementations.containsKey(registerInterface)) {
+            interfaceImplementations.get(registerInterface).add(clazz);
+        } else {
+            Set<Class<?>> classes = Collections.synchronizedSet(new LinkedHashSet<>());
+            classes.add(clazz);
+            interfaceImplementations.put(registerInterface, classes);
+        }
     }
 
     public <T> T[] getInterfaceInstances(Class<T> clazz) {
-        return null;
+        if (!clazz.isInterface()) {
+            throw  new InjectException(String.format("%s is not interface", clazz.getDeclaringClass().getSimpleName()));
+        }
+
+        Set<Class<?>> classes = interfaceImplementations.get(clazz);
+
+        if (classes == null) {
+            return null;
+        }
+
+        return (T[])classes.stream().map(this::getInstance).toArray();
     }
 
     public  <T> T  getInstance(Class<T> clazz) {
