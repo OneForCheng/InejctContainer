@@ -25,13 +25,12 @@ public class InjectContainer {
     }
 
     public void registerInterfaceImplementation(Class<?> registerInterface, Class<?> clazz) {
-        if (interfaceImplementations.containsKey(registerInterface)) {
-            interfaceImplementations.get(registerInterface).add(clazz);
-        } else {
-            Set<Class<?>> classes = Collections.synchronizedSet(new LinkedHashSet<>());
-            classes.add(clazz);
+        Set<Class<?>> classes = interfaceImplementations.get(registerInterface);
+        if (classes == null) {
+            classes = Collections.synchronizedSet(new LinkedHashSet<>());
             interfaceImplementations.put(registerInterface, classes);
         }
+        classes.add(clazz);
     }
 
     public <T> T[] getInterfaceInstances(Class<T> clazz) {
