@@ -4,7 +4,7 @@
 
 ### 目录
 
-- 概述
+- 简介
 - 基本功能
   - Inject
   - Singleton
@@ -17,11 +17,23 @@
 
 <br />
 
-### 概述
+### 简介
 
-InjectContainer 是一个轻量级（简单实现）的依赖注入框架。简而言之，你可以通过引入 InjectContainer 提供的注解来声明需要自动注入的对象依赖，其创建过程完全将由 InjectContainer 框架自动完成。
+在程序设计中，当 class A 使用 class B 的某些功能时，则表示 class A 具有 class B 依赖。而在使用 class 的方法之前，我们首先需要创建 class 的实例（即 class A 需要创建一个 class B 的实例）。如果把创建对象的任务转移给其他 class，而使用方无需关注其依赖是如何创建的，我们就把这个过程称之为“依赖注入”。
+
+
+
+而 InjectContainer 就是一个简单的依赖注入容器，使用它可以帮助我们自动的创建对象以及对象的依赖。
+
+
+
+![image](https://user-images.githubusercontent.com/1394854/43353572-2b449b32-926e-11e8-9e21-561ce8fb54c0.png)
 
 <br />
+
+
+
+
 
 ### 基本功能
 
